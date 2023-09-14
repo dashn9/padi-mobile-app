@@ -18,7 +18,8 @@
                 "*.tsx"
             ],
             "rules": {
-                "@typescript-eslint/indent": ["error", 4]
+                "@typescript-eslint/indent": ["error", 4],
+                "@typescript-eslint/consistent-type-definitions": "false"
             }
         }
     ],
