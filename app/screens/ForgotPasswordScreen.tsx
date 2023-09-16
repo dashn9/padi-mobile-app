@@ -69,7 +69,7 @@ const styles = StyleSheet.create({
         flex: 1,
         width: '85%',
         alignSelf: 'center',
-        justifyContent: 'center',
+        justifyConten: 'center',
     },
     forgotPasswordInputsContainer: {
         marginTop: metrics.verticalScale(32),

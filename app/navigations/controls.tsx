@@ -8,7 +8,7 @@ import AppText from '../components/text';
 import {useNavigation} from '@react-navigation/native';
 
 interface BackProps {
-    style: ViewStyle;
+    style?: ViewStyle;
 }
 export function Back({style}: BackProps) {
     const navigation = useNavigation();
