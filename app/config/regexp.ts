@@ -1,4 +1,5 @@
-const regexp: { [key: string]: RegExp }  = {
-    phone: /^((\\+[1-9]{1,4}[ \\-]*)|(\\([0-9]{2,3}\\)[ \\-]*)|([0-9]{2,4})[ \\-]*)*?[0-9]{3,4}?[ \\-]*[0-9]{3,4}?$/
+const regexp: Record<string, RegExp> = {
+    phone: /^(?:\+234|0)?(7|8|9)(0|1)\d{8}$/,
+
 };
 export default regexp;

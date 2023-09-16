@@ -11,20 +11,27 @@
   "dependencies": {
     "@expo/vector-icons": "^13.0.0",
     "@expo/webpack-config": "^19.0.0",
+    "@react-navigation/native": "^6.1.7",
+    "@react-navigation/stack": "^6.3.17",
     "expo": "~49.0.8",
     "expo-status-bar": "~1.6.0",
     "formik": "^2.4.4",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-native": "0.72.4",
+    "react-native-safe-area-context": "4.6.3",
+    "react-native-screens": "~3.22.0",
     "react-native-web": "~0.19.6",
-    "yup": "^1.2.0"
+    "yup": "^1.2.0",
+    "react-native-gesture-handler": "~2.12.0",
+    "expo-font": "~11.4.0",
+    "expo-splash-screen": "~0.20.5"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
     "@types/react": "~18.2.14",
-    "@typescript-eslint/eslint-plugin": "^6.6.0",
-    "@typescript-eslint/parser": "^6.6.0",
+    "@typescript-eslint/eslint-plugin": "^6.7.0",
+    "@typescript-eslint/parser": "^6.7.0",
     "eslint": "^8.49.0",
     "eslint-config-xo": "^0.43.1",
     "eslint-config-xo-typescript": "^1.0.1",
@@ -37,6 +44,7 @@
     "bracketSpacing": false,
     "semi": true,
     "singleQuote": true,
-    "tabWidth": 4
+    "tabWidth": 4,
+    "arrowParens": "avoid"
   }
 }

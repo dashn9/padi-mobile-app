@@ -1,20 +1,32 @@
-import React, {type ReactElement} from 'react';
-import {Button, SafeAreaView, StyleSheet, Text} from 'react-native';
-import RegistrationScreen from './app/screens/RegistrationScreen';
+import React, {useCallback, type ReactElement} from 'react';
+import {NavigationContainer} from '@react-navigation/native';
+import {useFonts} from 'expo-font';
+import * as SplashScreen from 'expo-splash-screen';
+
+import AuthStackNavigator from './app/navigations/AuthNavigator';
+
+// SplashScreen.preventAutoHideAsync();
 
 export default function App(): ReactElement {
+    const [fontsLoaded] = useFonts({
+        karla: require('./app/assets/fonts/karla/Karla-VariableFont_wght.ttf'),
+        karlaSemiBold: require('./app/assets/fonts/karla/static/Karla-SemiBold.ttf'),
+    });
+
+    const onLayoutRootView = useCallback(async () => {
+        if (fontsLoaded) {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+            await SplashScreen.hideAsync();
+        }
+    }, [fontsLoaded]);
+
+    if (!fontsLoaded) {
+        return <></>;
+    }
+
     return (
-        <SafeAreaView style={styles.container}>
-            <RegistrationScreen />
-        </SafeAreaView>
+        <NavigationContainer>
+            <AuthStackNavigator />
+        </NavigationContainer>
     );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#fff',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-});

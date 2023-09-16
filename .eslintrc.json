@@ -19,7 +19,9 @@
             ],
             "rules": {
                 "@typescript-eslint/indent": ["error", 4],
-                "@typescript-eslint/consistent-type-definitions": "false"
+                "@typescript-eslint/consistent-type-definitions": 0,
+                "@typescript-eslint/no-unsafe-assignment": "warn",
+                "@typescript-eslint/no-require-imports": "off"
             }
         }
     ],

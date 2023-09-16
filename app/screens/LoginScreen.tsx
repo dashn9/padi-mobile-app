@@ -9,20 +9,18 @@ import * as metrics from '../metrics/metrics';
 import {FormButton, FormButton2} from '../components/buttons';
 import {FormInput} from '../components/inputs';
 import {Header1, Subtitle2} from '../components/headers';
-import {HaveAnAccount, UseAsGuest} from '../components/custom-links';
+import {
+    DonotHaveAnAccount,
+    ForgotPassword,
+    UseAsGuest,
+} from '../components/custom-links';
 
-import regexp from '../config/regexp';
-
-const registrationValidationSchema = Yup.object().shape({
-    name: Yup.string().optional().max(50).label('Name'),
+const loginValidationSchema = Yup.object().shape({
     email: Yup.string().required().email().label('E-mail'),
-    phone: Yup.string()
-        .matches(regexp.phone, 'Phone Number is not valid')
-        .label('Phone Number'),
     password: Yup.string().required().min(6).label('Password'),
 });
 
-function RegistrationScreen() {
+function LoginScreen() {
     return (
         <Screen>
             <ScrollView
@@ -32,10 +30,17 @@ function RegistrationScreen() {
                 alwaysBounceVertical={false}
             >
                 <View style={styles.mainViewContainer}>
-                    <Header1>Create Your Account</Header1>
-                    <Subtitle2>
-                        Kindly fill the information below to set up your account
-                    </Subtitle2>
+                    <Header1
+                        style={{
+                            marginBottom: metrics.verticalScale(32),
+                        }}
+                    >
+                        Padi(Logo)
+                    </Header1>
+                    <Subtitle2>Welcome back!</Subtitle2>
+                    <Header1 style={{marginTop: metrics.verticalScale(8)}}>
+                        Log into Your Account
+                    </Header1>
                     <Formik
                         initialValues={{
                             name: '',
@@ -46,27 +51,11 @@ function RegistrationScreen() {
                         onSubmit={values => {
                             console.log(values);
                         }}
-                        validationSchema={registrationValidationSchema}
+                        validationSchema={loginValidationSchema}
                     >
-                        {({
-                            handleChange,
-                            handleSubmit,
-                            errors,
-                            touched,
-                            setFieldTouched,
-                        }) => (
+                        {({handleChange, handleSubmit, errors, touched}) => (
                             <>
-                                <View
-                                    style={styles.registrationInputsContainer}
-                                >
-                                    <FormInput
-                                        onChangeText={handleChange('name')}
-                                        placeholder='Enter your name'
-                                        textContentType='name'
-                                        inputLabel='Full Name'
-                                        error={errors.name}
-                                        touched={touched.name}
-                                    />
+                                <View style={styles.loginInputsContainer}>
                                     <FormInput
                                         onChangeText={handleChange('email')}
                                         placeholder='johndoe@gmail.com'
@@ -77,29 +66,19 @@ function RegistrationScreen() {
                                         touched={touched.email}
                                     />
                                     <FormInput
-                                        onChangeText={handleChange('phone')}
-                                        placeholder='+2349000000000'
-                                        textContentType='telephoneNumber'
-                                        keyboardType='phone-pad'
-                                        inputLabel='Phone Number'
-                                        error={errors.phone}
-                                        touched={touched.phone}
-                                    />
-                                    <FormInput
                                         onChangeText={handleChange('password')}
                                         placeholder='******'
                                         textContentType='password'
                                         secureTextEntry
-                                        inputLabel='Create Password'
+                                        inputLabel='Password'
                                         error={errors.password}
                                         touched={touched.password}
                                     />
                                 </View>
-                                <View
-                                    style={styles.registrationTriggersContainer}
-                                >
+                                <ForgotPassword />
+                                <View style={styles.loginTriggersContainer}>
                                     <FormButton
-                                        text='Sign Up'
+                                        text='Sign In'
                                         onPress={handleSubmit}
                                     />
                                     <FormButton2
@@ -107,7 +86,7 @@ function RegistrationScreen() {
                                         iconName='google'
                                     />
                                 </View>
-                                <HaveAnAccount />
+                                <DonotHaveAnAccount />
                                 <UseAsGuest />
                             </>
                         )}
@@ -124,13 +103,13 @@ const styles = StyleSheet.create({
         width: '85%',
         alignSelf: 'center',
     },
-    registrationInputsContainer: {
+    loginInputsContainer: {
         marginTop: metrics.verticalScale(32),
     },
-    registrationTriggersContainer: {
+    loginTriggersContainer: {
         justifyContent: 'space-evenly',
         alignItems: 'stretch',
     },
 });
 
-export default RegistrationScreen;
+export default LoginScreen;
