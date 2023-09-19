@@ -5,6 +5,9 @@ import * as SplashScreen from 'expo-splash-screen';
 
 import AuthStackNavigator from './app/navigations/AuthNavigator';
 
+// Imported for dev purpose.
+import 'expo-dev-client';
+
 // SplashScreen.preventAutoHideAsync();
 
 export default function App(): ReactElement {

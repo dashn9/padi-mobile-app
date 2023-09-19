@@ -1,5 +1,5 @@
 import React, {type ChangeEvent, useState} from 'react';
-import {StyleSheet, View, TextInput, Text} from 'react-native';
+import {StyleSheet, View, TextInput} from 'react-native';
 import type {KeyboardTypeOptions} from 'react-native';
 
 import * as metrics from '../metrics/metrics';
@@ -44,7 +44,7 @@ export function FormInput({
             <View style={styles.formTextInputBody}>
                 <TextInput
                     autoCorrect={false}
-                    secureTextEntry={secureTextEntry ?? !showPassword}
+                    secureTextEntry={secureTextEntry && !showPassword}
                     onChangeText={onChangeText}
                     style={styles.formTextInput}
                     placeholder={placeholder}
@@ -88,6 +88,7 @@ const styles = StyleSheet.create({
         fontSize: fonts.formInputFontSize,
         color: colors.formInputColor,
         fontFamily: fonts.primaryFontFamily,
+        width: '95%',
     },
     errorText: {
         color: 'red',

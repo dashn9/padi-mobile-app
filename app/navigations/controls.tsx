@@ -9,26 +9,27 @@ import {useNavigation} from '@react-navigation/native';
 
 interface BackProps {
     style?: ViewStyle;
+    backStepCount?: number;
 }
-export function Back({style}: BackProps) {
+export function Back({style, backStepCount = 1}: BackProps) {
     const navigation = useNavigation();
-    return (
-        <View style={[styles.backMainContainer, style]}>
-            <Pressable
-                style={styles.backContainer}
-                onPress={() => {
-                    navigation.goBack();
-                }}
-            >
-                <MaterialCommunityIcons
-                    name='pan-left'
-                    size={24}
-                    color={'#999'}
-                />
-                <AppText style={{color: '#999', fontSize: 16}}> Back</AppText>
-            </Pressable>
-        </View>
-    );
+    if (navigation.canGoBack()) {
+        return (
+            <View style={[styles.backMainContainer, style]}>
+                <Pressable
+                    style={styles.backContainer}
+                    onPress={() => {
+                        for (let i = 0; i < backStepCount; i++) {
+                            navigation.goBack();
+                        }
+                    }}
+                >
+                    <MaterialCommunityIcons name='pan-left' size={24} color={'#999'} />
+                    <AppText style={{color: '#999', fontSize: 16}}> Back</AppText>
+                </Pressable>
+            </View>
+        );
+    }
 }
 
 const styles = StyleSheet.create({
