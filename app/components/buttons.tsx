@@ -1,16 +1,11 @@
 import React from 'react';
-import {
-    Image,
-    StyleSheet,
-    Pressable,
-    Text,
-    ActivityIndicator,
-} from 'react-native';
+import {Image, StyleSheet, Pressable, Text, ActivityIndicator} from 'react-native';
 
-import * as metrics from '../metrics/metrics';
+import * as metrics from '../utils/metrics';
 import colors from '../config/colors';
 import fonts from '../config/fonts';
 import icons from '../config/icons';
+import loadingContext from '../hooks/contexts/LoadingContext';
 
 interface FormButtonProps {
     text: string;
@@ -33,10 +28,7 @@ export function FormButton({text, onPress}: FormButtonProps) {
 // This form button is most useful with external authentications
 export function FormButton2({text, onPress, iconName}: FormButton2Props) {
     return (
-        <Pressable
-            style={{...styles.formButton, ...styles.formButton2}}
-            onPress={onPress}
-        >
+        <Pressable style={{...styles.formButton, ...styles.formButton2}} onPress={onPress}>
             {iconName === 'google' ? (
                 <Image
                     style={{
@@ -48,9 +40,7 @@ export function FormButton2({text, onPress, iconName}: FormButton2Props) {
             ) : (
                 ''
             )}
-            <Text style={[styles.formButtonText, styles.formButtonText2]}>
-                {text}
-            </Text>
+            <Text style={[styles.formButtonText, styles.formButtonText2]}>{text}</Text>
             <ActivityIndicator color={colors.primaryColor} />
         </Pressable>
     );

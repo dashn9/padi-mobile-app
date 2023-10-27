@@ -9,7 +9,7 @@ import {Formik} from 'formik';
 import * as Yup from 'yup';
 
 import Screen from '../../components/screen';
-import * as metrics from '../../metrics/metrics';
+import * as metrics from '../../utils/metrics';
 import {FormButton} from '../../components/buttons';
 import {FormInput} from '../../components/inputs';
 import {Header1, Subtitle2} from '../../components/headers';

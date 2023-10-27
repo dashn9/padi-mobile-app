@@ -3,15 +3,18 @@ import {View, StyleSheet, Pressable} from 'react-native';
 import type {ViewStyle} from 'react-native';
 import {MaterialCommunityIcons} from '@expo/vector-icons';
 
-import * as metrics from '../metrics/metrics';
+import * as metrics from '../utils/metrics';
 import AppText from '../components/text';
 import {useNavigation} from '@react-navigation/native';
 
 interface BackProps {
     style?: ViewStyle;
+    color?: string;
     backStepCount?: number;
+
+    design?: 'default' | 'back-icon-only' | 'back-icon-only-2';
 }
-export function Back({style, backStepCount = 1}: BackProps) {
+export function Back({style, backStepCount = 1, color = '#999', design = 'default'}: BackProps) {
     const navigation = useNavigation();
     if (navigation.canGoBack()) {
         return (
@@ -24,8 +27,8 @@ export function Back({style, backStepCount = 1}: BackProps) {
                         }
                     }}
                 >
-                    <MaterialCommunityIcons name='pan-left' size={24} color={'#999'} />
-                    <AppText style={{color: '#999', fontSize: 16}}> Back</AppText>
+                    {design === 'default' || design === 'back-icon-only' ? <MaterialCommunityIcons name='pan-left' size={24} color={color} /> : design === 'back-icon-only-2' ? <MaterialCommunityIcons name='arrow-left-thin' size={30} color={color} /> : null}
+                    {design === 'default' ? <AppText style={{color, fontSize: 16}}> Back</AppText> : null}
                 </Pressable>
             </View>
         );
@@ -34,7 +37,6 @@ export function Back({style, backStepCount = 1}: BackProps) {
 
 const styles = StyleSheet.create({
     backMainContainer: {
-        width: '85%',
         position: 'absolute',
         top: metrics.verticalScale(148),
         zIndex: 99,

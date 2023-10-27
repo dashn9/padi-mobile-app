@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import {Text, StyleSheet, Animated, Easing} from 'react-native';
 
-import * as metrics from '../metrics/metrics';
+import * as metrics from '../utils/metrics';
 
 interface MessageProps {
     message: string;

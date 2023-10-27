@@ -6,7 +6,7 @@ import {CountdownCircleTimer} from 'react-native-countdown-circle-timer';
 import type {AuthStackList} from '../../navigations/AuthNavigator';
 
 import Screen from '../../components/screen';
-import * as metrics from '../../metrics/metrics';
+import * as metrics from '../../utils/metrics';
 import {FormButton} from '../../components/buttons';
 import {Header1, Subtitle2} from '../../components/headers';
 import {Back} from '../../navigations/controls';
@@ -77,8 +77,8 @@ const OtpCodeScreen: React.FC<OtpCodeScreenProps> = ({navigation, route}: OtpCod
             if (context === 'password-reset') {
                 navigation.pop();
                 navigation.navigate('ResetPasswordScreen');
-            } else {
-                navigation.navigate('HomeScreen');
+                // } else {
+                //     navigation.navigate('HomeScreen');
             }
         } else {
             showMessage('OTP requires 6 digits', 'failure');

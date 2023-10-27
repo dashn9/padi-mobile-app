@@ -6,7 +6,7 @@ interface AppTextProps {
     style?: StyleProp<TextStyle>;
 }
 function AppText({children, style}: AppTextProps) {
-    return <Text style={[style, {fontFamily: 'karla'}]}>{children}</Text>;
+    return <Text style={[{fontFamily: 'karla'}, style]}>{children}</Text>;
 }
 
 export default AppText;

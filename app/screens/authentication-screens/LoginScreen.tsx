@@ -7,7 +7,7 @@ import {Formik} from 'formik';
 import * as Yup from 'yup';
 
 import Screen from '../../components/screen';
-import * as metrics from '../../metrics/metrics';
+import * as metrics from '../../utils/metrics';
 import {FormButton, FormButton2} from '../../components/buttons';
 import {FormInput} from '../../components/inputs';
 import type {AuthStackList} from '../../navigations/AuthNavigator';
@@ -64,7 +64,6 @@ function LoginScreen() {
                                     <FormButton2 text='Sign in with Google' iconName='google' />
                                 </View>
                                 <DonotHaveAnAccount />
-                                <UseAsGuest />
                             </>
                         )}
                     </Formik>

@@ -1,7 +1,7 @@
 import React from 'react';
 import {Pressable, StyleSheet, Text} from 'react-native';
 
-import * as metrics from '../metrics/metrics';
+import * as metrics from '../utils/metrics';
 import colors from '../config/colors';
 import {useNavigation} from '@react-navigation/native';
 import type {AuthStackList} from '../navigations/AuthNavigator';
@@ -22,14 +22,8 @@ export function HaveAnAccount({linkText = 'Sign in'}: AnAccountProps) {
             }}
             style={styles.accountPressable}
         >
-            <AppText style={styles.haveAnAccount}>
-                Already have an account?{' '}
-            </AppText>
-            <AppText
-                style={[styles.haveAnAccount, {color: colors.primaryColor}]}
-            >
-                {linkText}
-            </AppText>
+            <AppText style={styles.haveAnAccount}>Already have an account? </AppText>
+            <AppText style={[styles.haveAnAccount, {color: colors.primaryColor}]}>{linkText}</AppText>
         </Pressable>
     );
 }
@@ -43,21 +37,13 @@ export function DonotHaveAnAccount({linkText = 'Sign up'}: AnAccountProps) {
             }}
             style={styles.accountPressable}
         >
-            <AppText style={styles.haveAnAccount}>
-                Don&apos;t have an account?&nbsp;
-            </AppText>
-            <AppText
-                style={[styles.haveAnAccount, {color: colors.primaryColor}]}
-            >
-                {linkText}
-            </AppText>
+            <AppText style={styles.haveAnAccount}>Don&apos;t have an account?&nbsp;</AppText>
+            <AppText style={[styles.haveAnAccount, {color: colors.primaryColor}]}>{linkText}</AppText>
         </Pressable>
     );
 }
 
-export function ForgotPassword({
-    linkText = 'Forgot Password?',
-}: AnAccountProps) {
+export function ForgotPassword({linkText = 'Forgot Password?'}: AnAccountProps) {
     const navigation = useNavigation<StackNavigationProp<AuthStackList>>();
     return (
         <Pressable
@@ -66,14 +52,7 @@ export function ForgotPassword({
             }}
             style={styles.accountPressable}
         >
-            <AppText
-                style={[
-                    styles.haveAnAccount,
-                    {color: colors.primaryColor, marginLeft: 'auto'},
-                ]}
-            >
-                {linkText}
-            </AppText>
+            <AppText style={[styles.haveAnAccount, {color: colors.primaryColor, marginLeft: 'auto'}]}>{linkText}</AppText>
         </Pressable>
     );
 }
@@ -102,7 +81,7 @@ const styles = StyleSheet.create({
     },
     useAsGuestText: {
         textAlign: 'center',
-        color: colors.primaryColor500,
+        color: colors.primaryColor600B,
         fontSize: metrics.moderateScale(12),
     },
 });
