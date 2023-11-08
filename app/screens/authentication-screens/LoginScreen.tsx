@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {StyleSheet, View, ScrollView} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {type StackNavigationProp} from '@react-navigation/stack';
@@ -14,6 +14,7 @@ import type {AuthStackList} from '../../navigations/AuthNavigator';
 import {Header1, Subtitle2} from '../../components/headers';
 import {DonotHaveAnAccount, ForgotPassword, UseAsGuest} from '../../components/custom-links';
 import Message, {useMessage} from '../../components/messages';
+import useAuth from '../../hooks/useAuth';
 
 const loginValidationSchema = Yup.object().shape({
     email: Yup.string().required().email().label('E-mail'),
@@ -24,6 +25,8 @@ function LoginScreen() {
     const navigator = useNavigation<StackNavigationProp<AuthStackList>>();
 
     const {isVisible, message, messageStatus, showMessage, hideMessage} = useMessage();
+    const [isNativeLoginApiLoading, setIsNativeLoginApiLoading] = useState(false);
+    const {nativeLogin} = useAuth();
     return (
         <Screen>
             <ScrollView style={{width: '100%'}} showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false} alwaysBounceVertical={false}>
@@ -43,12 +46,39 @@ function LoginScreen() {
                             email: '',
                             password: '',
                         }}
-                        onSubmit={values => {
-                            console.log(values);
-                            navigator.navigate('OtpCodeScreen', {
-                                context: 'two-factor-authentication',
-                                email: values.email,
-                            });
+                        onSubmit={async (values, {setErrors}) => {
+                            setIsNativeLoginApiLoading(true);
+                            const loginRespInfo = await nativeLogin(values);
+
+                            if (loginRespInfo) {
+                                const responseData = loginRespInfo[1];
+                                if (loginRespInfo[0] === 'error') {
+                                    setErrors(responseData);
+                                    // You can find more edge cases to manually display in the message and make this the last case scenario
+                                    // Check if any errorin the acceptable errors to display for form fields.
+                                    const acceptableErrorsToDispForField = ['detail', 'email', 'password'];
+                                    console.log(responseData);
+                                    if (
+                                        !Object.keys(responseData).some(val => {
+                                            if (acceptableErrorsToDispForField.includes(val)) {
+                                                if (val === 'detail') {
+                                                    showMessage('Invalid Credentials!', 'failure');
+                                                }
+
+                                                return true;
+                                            }
+
+                                            return false;
+                                        })
+                                    ) {
+                                        showMessage('Server error occurred!', 'failure');
+                                    }
+                                } else if (loginRespInfo[0] === 'success') {
+                                    showMessage('Welcome Back!', 'success');
+                                }
+                            }
+
+                            setIsNativeLoginApiLoading(false);
                         }}
                         validationSchema={loginValidationSchema}
                     >
@@ -60,7 +90,7 @@ function LoginScreen() {
                                 </View>
                                 <ForgotPassword />
                                 <View style={styles.loginTriggersContainer}>
-                                    <FormButton text='Sign In' onPress={handleSubmit} />
+                                    <FormButton text='Sign In' onPress={handleSubmit} isApiLoading={isNativeLoginApiLoading} />
                                     <FormButton2 text='Sign in with Google' iconName='google' />
                                 </View>
                                 <DonotHaveAnAccount />

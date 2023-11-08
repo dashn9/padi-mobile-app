@@ -1,20 +1,6 @@
-import axios, {isAxiosError, type AxiosError, type AxiosRequestConfig, type AxiosResponse} from 'axios';
+import axios, {type AxiosError, type AxiosRequestConfig, type AxiosResponse} from 'axios';
 import apis from '.';
-
-// eslint-disable-next-line @typescript-eslint/naming-convention
-export const API_BASE_URL = 'http://127.0.0.1:8000';
-
-type TrequestMethodTypes = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'HEAD';
-
-export interface IapiEndpoint {
-    url: string;
-    name: string;
-    method: TrequestMethodTypes;
-    requireAuthToken: boolean;
-    headers?: Record<string, string>;
-    params?: Record<string, string>;
-    description?: string;
-}
+import {type TrequestMethodTypes} from './constants';
 
 interface RequestOptions<T, K> {
     urlId: string;
@@ -24,10 +10,10 @@ interface RequestOptions<T, K> {
     data?: T;
     responseType?: 'json' | 'text' | 'blob' | 'arraybuffer'; // Add more as needed
     timeout?: number; // Request timeout in milliseconds
-    transformResponse?: (response: AxiosResponse) => K;
+    transformResponse?: (responseData: K) => unknown;
 }
 
-export async function sendRequest<T, K extends Record<string, any>>({
+export async function sendRequest<T, K extends Record<string, any> | ArrayBuffer | string | void>({
     urlId,
     headers = {},
     params = {},
@@ -39,18 +25,16 @@ export async function sendRequest<T, K extends Record<string, any>>({
     const api = apis[urlId];
     const config: AxiosRequestConfig = {
         method: api.method,
-        url: API_BASE_URL + api.url,
+        url: api.url,
         headers: {...api.headers, ...headers},
         params: {...api.params, params},
         data,
         responseType,
+        transformResponse,
         timeout,
     };
     try {
         const response = await axios(config);
-        if (transformResponse) {
-            return transformResponse(response);
-        }
 
         return response.data as K;
     } catch (error) {

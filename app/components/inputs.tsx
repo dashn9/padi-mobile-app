@@ -33,8 +33,12 @@ export function FormInput({inputLabel, placeholder, textContentType, keyboardTyp
     const parseError = (error: string | string[]) => {
         const errors: React.ReactElement[] = [];
         if (Array.isArray(error)) {
-            error.reduce((prev, curr) => {
-                prev.push(<AppText style={styles.errorText}>{curr}</AppText>);
+            error.reduce((prev, curr, index) => {
+                prev.push(
+                    <AppText key={index} style={styles.errorText}>
+                        {curr}
+                    </AppText>
+                );
                 return prev;
             }, errors);
         } else {
@@ -49,7 +53,7 @@ export function FormInput({inputLabel, placeholder, textContentType, keyboardTyp
             {inputLabel && <AppText style={styles.formInputLabel}>{inputLabel}</AppText>}
             <View style={[styles.formTextInputBody, inputBoxStyle]}>
                 <TextInput autoCorrect={false} secureTextEntry={secureTextEntry && !showPassword} onChangeText={onChangeText} style={styles.formTextInput} placeholder={placeholder} textContentType={textContentType} keyboardType={keyboardType} autoCapitalize='none' />
-                {secureTextEntry && <MaterialCommunityIcons name={showPassword ? 'eye-off' : 'eye'} size={icons.inputIconDimension} color={colors.inputIconColor} style={{marginLeft: 'auto'}} onPress={toggleShowPassword} />}
+                {secureTextEntry && <MaterialCommunityIcons name={showPassword ? 'eye-off' : 'eye'} size={icons.l} color={colors.inputIconColor} style={{marginLeft: 'auto'}} onPress={toggleShowPassword} />}
             </View>
             {touched && error && parseError(error)}
         </View>
@@ -99,7 +103,7 @@ interface SearchableDropDownProps {
 export function SearchableDropDown({items, value, setValue, placeholder, searchPlaceholder}: SearchableDropDownProps) {
     const [stateItems, setItems] = useState<any[]>(items);
     const [open, setOpen] = useState(false);
-    return <DropDownPicker open={open} setOpen={setOpen} containerStyle={styles.searchableDropDownContainer} style={styles.searchableDropDown} dropDownContainerStyle={styles.searchableDropDown} searchTextInputStyle={styles.searchableDropDownSearchInput} items={stateItems} value={value} setValue={setValue} setItems={setItems} placeholder={placeholder} placeholderStyle={styles.dropDownPlaceholderStyle} activityIndicatorColor='#5188E3' searchable={true} searchPlaceholder={searchPlaceholder} />;
+    return <DropDownPicker open={open} setOpen={setOpen} style={styles.searchableDropDownContainer} dropDownContainerStyle={styles.searchableDropDown} listItemContainerStyle={styles.searchableDropDownListItemParentContainer} searchTextInputStyle={styles.searchableDropDownSearchInput} selectedItemContainerStyle={styles.searchableDropDownSelectedItemContainerStyle} selectedItemLabelStyle={styles.searchableDropDownSelectedItemLabelContainerStyle} items={stateItems} value={value} setValue={setValue} setItems={setItems} placeholder={placeholder} placeholderStyle={styles.dropDownPlaceholderStyle} activityIndicatorColor='#5188E3' searchable={true} searchPlaceholder={searchPlaceholder} />;
 }
 
 // I created this custom hook for the SearchBar, and now, I feel the need not to use it. Upgrade and use if there is need to abstract and reuse some serious logic
@@ -163,16 +167,31 @@ const styles = StyleSheet.create({
 
     // Drop Downs
     searchableDropDownContainer: {
-        width: '48%',
         marginTop: metrics.verticalScale(18),
+        backgroundColor: colors.formInputBgColor2,
+        borderWidth: 0,
+        borderRadius: 8,
     },
     searchableDropDown: {
         borderWidth: 0,
-        backgroundColor: colors.formInputBgColor2,
-        borderRadius: 14,
+        marginTop: metrics.verticalScale(24),
+        shadowOffset: {width: 2, height: 2},
+        shadowRadius: 4,
+        shadowOpacity: 1,
+        shadowColor: colors.boxShadow,
+        overflow: 'visible',
+    },
+    searchableDropDownListItemParentContainer: {
+        backgroundColor: colors.white,
     },
     searchableDropDownSearchInput: {
-        borderColor: colors.primaryColor,
+        borderWidth: 0,
+    },
+    searchableDropDownSelectedItemLabelContainerStyle: {
+        color: colors.primaryColor,
+    },
+    searchableDropDownSelectedItemContainerStyle: {
+        backgroundColor: colors.lightbgGreyColor,
     },
     dropDownPlaceholderStyle: {},
 });

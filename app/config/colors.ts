@@ -13,12 +13,14 @@ const colors: Record<string, string> = {
     formInputBgColor2: '#F8F9FF',
     formInputColor: '#344054',
     formInputLabelColor: '#81909D',
+    lightbgGreyColor: '#F5F7FD',
     headerColor: '#242526',
     subtitleColor: '#5D5E5F',
     inputIconColor: '#555',
     homeHeaderColor: '#172B4D',
     ratingColor: '#FFBF1C',
     defaultTextColor: '#0E0E0E',
+    boxShadow: '#0000001A',
     white: '#FFFFFF',
 };
 export default colors;

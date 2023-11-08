@@ -12,8 +12,9 @@ export type AuthStackList = {
         | {
               context: 'email-verification' | 'password-reset' | 'two-factor-authentication';
               email: string;
+              password: string;
           }
-        | {context: 'session-authenticate'; email: never};
+        | {context: 'session-authenticate'; email: never; password: never};
     ResetPasswordScreen: undefined;
 };
 

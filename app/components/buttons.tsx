@@ -10,30 +10,31 @@ import loadingContext from '../hooks/contexts/LoadingContext';
 interface FormButtonProps {
     text: string;
     onPress?: () => void | undefined;
+    isApiLoading?: boolean;
 }
 
 interface FormButton2Props extends FormButtonProps {
     iconName?: 'google' | 'apple' | 'facebook';
 }
 
-export function FormButton({text, onPress}: FormButtonProps) {
+export function FormButton({text, onPress, isApiLoading = false}: FormButtonProps) {
     return (
         <Pressable style={styles.formButton} onPress={onPress}>
             <Text style={styles.formButtonText}>{text}</Text>
-            <ActivityIndicator color='#fff' />
+            {isApiLoading ? <ActivityIndicator color='#fff' /> : null}
         </Pressable>
     );
 }
 
 // This form button is most useful with external authentications
-export function FormButton2({text, onPress, iconName}: FormButton2Props) {
+export function FormButton2({text, onPress, iconName, isApiLoading = false}: FormButton2Props) {
     return (
         <Pressable style={{...styles.formButton, ...styles.formButton2}} onPress={onPress}>
             {iconName === 'google' ? (
                 <Image
                     style={{
-                        width: icons.authIconDimension,
-                        height: icons.authIconDimension,
+                        width: icons.xl2,
+                        height: icons.xl2,
                     }}
                     source={require('../assets/icons/google-48.png')}
                 />
@@ -41,7 +42,7 @@ export function FormButton2({text, onPress, iconName}: FormButton2Props) {
                 ''
             )}
             <Text style={[styles.formButtonText, styles.formButtonText2]}>{text}</Text>
-            <ActivityIndicator color={colors.primaryColor} />
+            {isApiLoading ? <ActivityIndicator color={colors.primaryColor} /> : null}
         </Pressable>
     );
 }

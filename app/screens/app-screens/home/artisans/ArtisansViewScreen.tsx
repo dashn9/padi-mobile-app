@@ -29,7 +29,7 @@ function ArtisansViewScreen({route, navigation}: ArtisansViewScreenProps) {
     return (
         <Screen>
             <View style={styles.artisansViewScreenContainer}>
-                <View>
+                <View style={styles.artisansViewHeaderContainer}>
                     <AppHeader>{route.params.artisansGroupName}</AppHeader>
                     <SearchBox onSearchSubmit={updateSearchValue} />
                     <SearchableDropDown items={states} value={stateValue} setValue={setStateValue} placeholder='State' searchPlaceholder='Search States' />
@@ -67,6 +67,9 @@ const styles = StyleSheet.create({
     artisansViewScreenContainer: {
         flex: 1,
         width: '90%',
+    },
+    artisansViewHeaderContainer: {
+        zIndex: 2,
     },
 });
 export default ArtisansViewScreen;

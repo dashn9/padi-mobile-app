@@ -25,7 +25,7 @@ function ArtisanProfileStat({iconBackDropColor, iconColor, iconName, statName, s
     return (
         <View style={styles.artisanProfileStat}>
             <View style={[styles.artisanProfileInfoIconBackdrop, {backgroundColor: iconBackDropColor}]}>
-                <MaterialCommunityIcons name={iconName} size={icons.artisanProfileIconSize} color={iconColor} />
+                <MaterialCommunityIcons name={iconName} size={icons.xl2} color={iconColor} />
             </View>
             <AppText style={{textAlign: 'center', top: 12, fontSize: fonts.medium}}>{statValue}</AppText>
             <AppText style={{textAlign: 'center', top: 12, fontSize: fonts.normal}}>{statName}</AppText>

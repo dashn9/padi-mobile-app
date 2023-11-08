@@ -22,7 +22,7 @@ export function CompleteYourProfileCard() {
     return (
         <View style={styles.completeYourProfileBarContainer}>
             <View style={styles.completeYourProfileIconBackDrop}>
-                <AntDesign name='user' size={icons.inputIconDimension} color={colors.primaryColor} />
+                <AntDesign name='user' size={icons.l} color={colors.primaryColor} />
             </View>
             <View style={styles.completeYourProfileTextContainer}>
                 <Header4 style={{marginTop: 0}}>Complete your profile</Header4>
@@ -95,13 +95,13 @@ export function ArtisanProfileListCard({name, state, rating, reviewsCount}: Arti
                 <View style={styles.artisanProfilListCardInnerContainer}>
                     <AppText style={styles.artisansProfileListCardNameTextStyle}>{name}</AppText>
                     <View style={styles.artisanProfileListCardRatingContainer}>
-                        <AntDesign name='star' color={colors.ratingColor} size={metrics.moderateScale(icons.artisanProfileListCardIconSize)} />
+                        <AntDesign name='star' color={colors.ratingColor} size={metrics.moderateScale(icons.xs)} />
                         <AppText> {rating}</AppText>
                     </View>
                 </View>
                 <View style={[styles.artisanProfilListCardInnerContainer, {marginTop: metrics.verticalScale(12)}]}>
                     <View style={styles.artisanProfileListCardLocationContainer}>
-                        <EvilIcons name='location' size={metrics.moderateScale(icons.artisanProfileListCardIconSize + 2)} />
+                        <EvilIcons name='location' size={metrics.moderateScale(icons.xs + 2)} />
                         <AppText style={{color: '#848484', fontSize: metrics.moderateScale(15)}}>{state}</AppText>
                     </View>
                     {reviewsCount ? <AppText style={{marginLeft: 'auto', color: '#848484', fontSize: metrics.moderateScale(15)}}>{reviewsCount} reviews</AppText> : null}
@@ -121,7 +121,7 @@ export function RatingCard({userId}: IratingCardProps) {
                 <View style={styles.artisanProfilListCardInnerContainer}>
                     <AppText style={styles.artisansProfileListCardNameTextStyle}>James Guidetti</AppText>
                     <View style={styles.artisanProfileListCardRatingContainer}>
-                        <AntDesign name='star' color={colors.ratingColor} size={metrics.moderateScale(icons.artisanProfileListCardIconSize)} />
+                        <AntDesign name='star' color={colors.ratingColor} size={metrics.moderateScale(icons.xs)} />
                         <AppText> {4.5}</AppText>
                     </View>
                 </View>
@@ -145,7 +145,7 @@ export function MessageUserCardProps({userId}: ImessageUserCardProps) {
                 <AppText style={{fontSize: fonts.medium}}>Message</AppText>
             </View>
             <Pressable style={styles.callButton}>
-                <Feather name='phone' size={icons.xxxL} color={colors.white} />
+                <Feather name='phone' size={icons.xl6} color={colors.white} />
             </Pressable>
         </View>
     );

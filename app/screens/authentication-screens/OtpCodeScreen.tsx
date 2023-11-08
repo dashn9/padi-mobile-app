@@ -15,6 +15,7 @@ import {useMessage} from '../../components/messages';
 import AppText from '../../components/text';
 import colors from '../../config/colors';
 import fonts from '../../config/fonts';
+import useAuth from '../../hooks/useAuth';
 
 interface OtpResendOptionProps {
     email: string;
@@ -24,15 +25,26 @@ interface OtpResendOptionProps {
 const OtpResendOption: React.FC<OtpResendOptionProps> = ({email, showMessage}) => {
     const [countdownRemTime, setCountdownRemTime] = useState(60);
     const [restartKey, setRestartKey] = useState(0);
-
+    const {generateOtp} = useAuth();
     const resendOtpCode = () => {
-        if (countdownRemTime <= 0) {
-            if (showMessage) {
-                showMessage('Code Re-Sent!', 'success');
-            }
+        generateOtp({email})
+            .then(data => {
+                console.log(data);
+                if (data && data[0] === 'success') {
+                    if (showMessage) {
+                        showMessage('Code Re-Sent!', 'success');
+                    }
 
-            setRestartKey(prevRestartKey => prevRestartKey + 1);
-        }
+                    setRestartKey(prevRestartKey => prevRestartKey + 1);
+                } else {
+                    throw new Error('OTP Generation failed');
+                }
+            })
+            .catch(() => {
+                if (showMessage) {
+                    showMessage('Unable to generate new OTP', 'failure');
+                }
+            });
     };
 
     return (
@@ -46,7 +58,7 @@ const OtpResendOption: React.FC<OtpResendOptionProps> = ({email, showMessage}) =
                 }}
             </CountdownCircleTimer>
             <AppText style={styles.otpResendText}>&nbsp;&nbsp;Can&apos;t find the code?&nbsp;</AppText>
-            <Pressable onPress={resendOtpCode}>
+            <Pressable onPress={countdownRemTime <= 0 ? resendOtpCode : null}>
                 <AppText style={{color: countdownRemTime <= 0 ? colors.primaryColor : colors.subtitleColor, fontFamily: fonts.primaryFontFamilySemiBold, fontSize: fonts.formInputFontSize}}>Resend Code</AppText>
             </Pressable>
         </View>
@@ -55,8 +67,10 @@ const OtpResendOption: React.FC<OtpResendOptionProps> = ({email, showMessage}) =
 
 type OtpCodeScreenProps = NativeStackScreenProps<AuthStackList, 'OtpCodeScreen'>;
 const OtpCodeScreen: React.FC<OtpCodeScreenProps> = ({navigation, route}: OtpCodeScreenProps) => {
-    const {context, email} = route.params;
+    const {context, email, password} = route.params;
     const [otpCode, setOtpCode] = useState<string>('');
+    const {nativeLogin} = useAuth();
+    const [isOtpVerificationApiLoading, setOtpVerificationLoading] = useState(false);
     const maxDigits = 6;
 
     const handleDigitPress = (digit: string) => {
@@ -72,13 +86,39 @@ const OtpCodeScreen: React.FC<OtpCodeScreenProps> = ({navigation, route}: OtpCod
     };
 
     const onCodeSubmit = () => {
-        if (otpCode.length === 6) {
-            // Make additional checks to see if all digits in string are numbers
+        // The otp code by default is in string format
+        const numOtpCode = parseInt(otpCode, 10);
+        if (numOtpCode && otpCode.length === 6) {
             if (context === 'password-reset') {
                 navigation.pop();
                 navigation.navigate('ResetPasswordScreen');
-                // } else {
-                //     navigation.navigate('HomeScreen');
+            } else {
+                setOtpVerificationLoading(true);
+                verifyOtp({email, otp: numOtpCode})
+                    .then(data => {
+                        if (data && data[0] === 'success') {
+                            if (showMessage) {
+                                showMessage('Email Verified!', 'success');
+                            }
+
+                            if (route.params.context === 'email-verification') {
+                                nativeLogin({email, password})
+                                    .then()
+                                    .catch(() => {
+                                        navigation.navigate('SignIn');
+                                    });
+                            }
+                        } else {
+                            throw new Error('Invalid OTP');
+                        }
+
+                        setOtpVerificationLoading(false);
+                    })
+                    .catch(() => {
+                        showMessage('Invalid OTP', 'failure');
+
+                        setOtpVerificationLoading(false);
+                    });
             }
         } else {
             showMessage('OTP requires 6 digits', 'failure');
@@ -86,6 +126,10 @@ const OtpCodeScreen: React.FC<OtpCodeScreenProps> = ({navigation, route}: OtpCod
     };
 
     const {isVisible, message, messageStatus, showMessage, hideMessage} = useMessage();
+
+    const {verifyOtp} = useAuth();
+
+    // Mimic component onmount lifecycle hook.
     return (
         <Screen>
             <View style={styles.container}>
@@ -145,7 +189,7 @@ const OtpCodeScreen: React.FC<OtpCodeScreenProps> = ({navigation, route}: OtpCod
                         <Text style={styles.backspaceButtonText}>←</Text>
                     </TouchableOpacity>
                 </View>
-                <FormButton onPress={onCodeSubmit} text='Proceed' />
+                <FormButton onPress={onCodeSubmit} text='Proceed' isApiLoading={isOtpVerificationApiLoading} />
                 {email && <OtpResendOption email={email} showMessage={showMessage} />}
             </View>
         </Screen>

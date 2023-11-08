@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {StyleSheet, View, ScrollView} from 'react-native';
 
 import {useNavigation} from '@react-navigation/native';
@@ -22,15 +22,17 @@ import Message, {useMessage} from '../../components/messages';
 const registrationValidationSchema = Yup.object().shape({
     // It had to be declared this way to maintain consistency between server fields requirements
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    full_name: Yup.string().required().max(50).label('Name'),
+    full_name: Yup.string().required().max(50).label('Full Name'),
     email: Yup.string().required().email().label('E-mail'),
     phone: Yup.string().matches(regexp.phone, 'Phone Number is not valid').label('Phone Number'),
     password: Yup.string().required().min(8).label('Password'),
 });
 
 function RegistrationScreen() {
+    const [isNativeRegistrationApiLoading, setNativeRegistrationApiLoading] = useState(false);
     const {isVisible, message, messageStatus, showMessage, hideMessage} = useMessage();
     const navigator = useNavigation<StackNavigationProp<AuthStackList>>();
+    const {nativeRegister, generateOtp} = useAuth();
     return (
         <Screen>
             <ScrollView style={{width: '100%'}} showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false} alwaysBounceVertical={false}>
@@ -40,7 +42,7 @@ function RegistrationScreen() {
                     <Subtitle2>Kindly fill the information below to set up your account</Subtitle2>
                     <Formik
                         initialValues={{
-                            // It has to be disabled because that's the key for the full_name parameter for registration
+                            // It has to be disabled because that's the the full_name parameter for registration
                             // eslint-disable-next-line @typescript-eslint/naming-convention
                             full_name: '',
                             email: '',
@@ -48,27 +50,37 @@ function RegistrationScreen() {
                             password: '',
                         }}
                         onSubmit={async (values, {setErrors}) => {
-                            const {nativeRegister} = useAuth();
+                            setNativeRegistrationApiLoading(true);
                             const registrationInfo = await nativeRegister(values);
+                            setNativeRegistrationApiLoading(false);
 
                             if (registrationInfo) {
-                                const responseData = registrationInfo[1] as Record<string, any>;
+                                const responseData = registrationInfo[1];
                                 if (registrationInfo[0] === 'error') {
                                     setErrors(responseData);
                                     // You can find more edge cases to manually display in the message and make this the last case scenario
-                                    // Check if any error key is in the acceptable errors to display for form fields.
+                                    // Check if any errorin the acceptable errors to display for form fields.
                                     const acceptableErrorsToDispForField = ['full_name', 'email', 'phone', 'password'];
-                                    if (Object.keys(responseData).filter(val => !acceptableErrorsToDispForField.includes(val))) {
+                                    console.log(responseData);
+                                    if (Object.keys(responseData).some(val => !acceptableErrorsToDispForField.includes(val))) {
                                         showMessage('Server error occurred!', 'failure');
                                     }
                                 } else if (registrationInfo[0] === 'success') {
                                     showMessage(`Welcome! ${responseData.first_name}`, 'success');
-                                    setTimeout(() => {
-                                        navigator.navigate('OtpCodeScreen', {
-                                            context: 'email-verification',
-                                            email: values.email,
-                                        });
-                                    }, 2000);
+                                    try {
+                                        setNativeRegistrationApiLoading(true);
+                                        await generateOtp({email: values.email});
+                                        setNativeRegistrationApiLoading(false);
+                                        setTimeout(() => {
+                                            navigator.navigate('OtpCodeScreen', {
+                                                context: 'email-verification',
+                                                email: values.email,
+                                                password: values.password,
+                                            });
+                                        }, 2000);
+                                    } catch {
+                                        showMessage('OTP can&apos;t be generated', 'failure');
+                                    }
                                 }
                             }
                         }}
@@ -83,7 +95,7 @@ function RegistrationScreen() {
                                     <FormInput onChangeText={handleChange('password')} placeholder='******' textContentType='password' secureTextEntry inputLabel='Create Password' error={errors.password} touched={touched.password} />
                                 </View>
                                 <View style={styles.registrationTriggersContainer}>
-                                    <FormButton text='Sign Up' onPress={handleSubmit} />
+                                    <FormButton text='Sign Up' onPress={handleSubmit} isApiLoading={isNativeRegistrationApiLoading} />
                                     <FormButton2 text='Sign in with Google' iconName='google' />
                                 </View>
                                 <HaveAnAccount />
