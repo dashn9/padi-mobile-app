@@ -1,63 +1,64 @@
-import React, {useEffect, useState} from 'react';
-import {View, StyleSheet, Pressable} from 'react-native';
+import React, {useState} from 'react';
+import {View, StyleSheet, Pressable, FlatList, ActivityIndicator} from 'react-native';
+
 import Screen from '../../../../components/screen';
 import {AppHeader} from '../../../../components/headers';
 import type {ArtisansViewScreenProps} from '../../../../navigations/ArtisansNavigator';
 import {SearchBox, SearchableDropDown} from '../../../../components/inputs';
 import {states} from '../../../../config/lists';
 import {ArtisanProfileListCard} from '../../../../components/cards';
-import {ScrollView} from 'react-native-gesture-handler';
+import {usePageNumberPagination} from '../../../../hooks/usePagination';
 
 import * as metrics from '../../../../utils/metrics';
+import {useFetchArtisansPaginatedQuery, type ArtisanLight} from '../../../../hooks/queries/useArtisanQuery';
+import colors from '../../../../config/colors';
+
+interface RenderArtisanProps {
+    item: ArtisanLight;
+}
 
 function ArtisansViewScreen({route, navigation}: ArtisansViewScreenProps) {
     const [searchValue, setSearchValue] = useState('');
     const [stateValue, setStateValue] = useState('');
-
-    useEffect(() => {
-        console.log(stateValue);
-    }, [stateValue]);
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    const {results, isPaginationLoading, goForward} = usePageNumberPagination(useFetchArtisansPaginatedQuery, true, {search: searchValue, filters: {services__service_code__in: route.params.serviceCode, state: stateValue}});
 
     const updateSearchValue = (searchValue: string) => {
         setSearchValue(searchValue);
     };
 
-    const fetchArtisansByName = (artisanName: string) => {
-        console.log('');
+    const updateStateValue = (stateValue: React.SetStateAction<string>) => {
+        setSearchValue('');
+        setStateValue(stateValue);
     };
+
+    const updateArtisansList = () => {
+        if (!isPaginationLoading) {
+            goForward();
+        }
+    };
+
+    const renderArtisan = ({item}: RenderArtisanProps) => (
+        <Pressable
+            onPress={() => {
+                navigation.navigate('ArtisanViewScreen', {artisanId: item.id});
+            }}
+        >
+            <ArtisanProfileListCard name={`${item.firstName} ${item.lastName}`} state={item.stateFull} rating={4.5} reviewsCount={20} />
+        </Pressable>
+    );
+
+    const renderArtisanFooter = () => <View style={styles.artisansFlatListFooter}>{isPaginationLoading ? <ActivityIndicator color={colors.primaryColor800B} /> : null}</View>;
 
     return (
         <Screen>
             <View style={styles.artisansViewScreenContainer}>
                 <View style={styles.artisansViewHeaderContainer}>
-                    <AppHeader>{route.params.artisansGroupName}</AppHeader>
+                    <AppHeader>{route.params.serviceGroupName}</AppHeader>
                     <SearchBox onSearchSubmit={updateSearchValue} />
-                    <SearchableDropDown items={states} value={stateValue} setValue={setStateValue} placeholder='State' searchPlaceholder='Search States' />
+                    <SearchableDropDown items={states} value={stateValue} setValue={updateStateValue} placeholder='State' searchPlaceholder='Search States' />
                 </View>
-                {/* Definitely Make use of a FlatList here intead (Very Importaint) */}
-                <ScrollView showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false}>
-                    <View style={{paddingBottom: metrics.verticalScale(16)}}>
-                        <Pressable
-                            onPress={() => {
-                                navigation.navigate('ArtisanViewScreen', {artisanId: 0});
-                            }}
-                        >
-                            <ArtisanProfileListCard name='Charles Emmanuel' state='Lagos' rating={4.5} reviewsCount={20} />
-                        </Pressable>
-                        <ArtisanProfileListCard name='Charles Emmanuel' state='Lagos' rating={4.5} reviewsCount={20} />
-                        <ArtisanProfileListCard name='Charles Emmanuel' state='Lagos' rating={4.5} reviewsCount={20} />
-                        <ArtisanProfileListCard name='Charles Emmanuel' state='Lagos' rating={4.5} reviewsCount={20} />
-                        <ArtisanProfileListCard name='Charles Emmanuel' state='Lagos' rating={4.5} reviewsCount={20} />
-                        <ArtisanProfileListCard name='Charles Emmanuel' state='Lagos' rating={4.5} reviewsCount={20} />
-                        <ArtisanProfileListCard name='Charles Emmanuel' state='Lagos' rating={4.5} reviewsCount={20} />
-                        <ArtisanProfileListCard name='Charles Emmanuel' state='Lagos' rating={4.5} reviewsCount={20} />
-                        <ArtisanProfileListCard name='Charles Emmanuel' state='Lagos' rating={4.5} reviewsCount={20} />
-                        <ArtisanProfileListCard name='Charles Emmanuel' state='Lagos' rating={4.5} reviewsCount={20} />
-                        <ArtisanProfileListCard name='Charles Emmanuel' state='Lagos' rating={4.5} reviewsCount={20} />
-                        <ArtisanProfileListCard name='Charles Emmanuel' state='Lagos' rating={4.5} reviewsCount={20} />
-                        <ArtisanProfileListCard name='Charles Emmanuel' state='Lagos' rating={4.5} reviewsCount={20} />
-                    </View>
-                </ScrollView>
+                <FlatList data={Array.from(results)} renderItem={renderArtisan} onEndReached={updateArtisansList} onEndReachedThreshold={0.1} showsVerticalScrollIndicator={false} ListFooterComponent={renderArtisanFooter} />
             </View>
         </Screen>
     );
@@ -70,6 +71,10 @@ const styles = StyleSheet.create({
     },
     artisansViewHeaderContainer: {
         zIndex: 2,
+    },
+    artisansFlatListFooter: {
+        alignItems: 'center',
+        marginTop: metrics.verticalScale(8),
     },
 });
 export default ArtisansViewScreen;

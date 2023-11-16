@@ -1,5 +1,6 @@
-import React, {useCallback, type ReactElement, useState, useEffect} from 'react';
+import React, {useCallback, type ReactElement, useEffect} from 'react';
 import {NavigationContainer} from '@react-navigation/native';
+import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
 import {useFonts} from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 
@@ -30,7 +31,7 @@ if (!global.atob) {
 
 function NavContainer() {
     const {user} = useAuthContext();
-    const {retrieveAndSetUser, refreshAccessToken} = useAuth();
+    const {retrieveAndSetUser} = useAuth();
 
     // It(useEffect) behaves as the onComponentMount lifecycle hook
     useEffect(() => {
@@ -53,6 +54,8 @@ export default function App(): ReactElement {
         karlaBold: require('./app/assets/fonts/karla/static/Karla-Bold.ttf'),
     });
 
+    const queryClient = new QueryClient();
+
     const onLayoutRootView = useCallback(async () => {
         if (fontsLoaded) {
             await SplashScreen.hideAsync();
@@ -64,8 +67,10 @@ export default function App(): ReactElement {
     }
 
     return (
-        <AuthContextProvider>
-            <NavContainer />
-        </AuthContextProvider>
+        <QueryClientProvider client={queryClient}>
+            <AuthContextProvider>
+                <NavContainer />
+            </AuthContextProvider>
+        </QueryClientProvider>
     );
 }

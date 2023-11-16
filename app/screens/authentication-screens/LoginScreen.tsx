@@ -56,21 +56,9 @@ function LoginScreen() {
                                     setErrors(responseData);
                                     // You can find more edge cases to manually display in the message and make this the last case scenario
                                     // Check if any errorin the acceptable errors to display for form fields.
-                                    const acceptableErrorsToDispForField = ['detail', 'email', 'password'];
-                                    console.log(responseData);
-                                    if (
-                                        !Object.keys(responseData).some(val => {
-                                            if (acceptableErrorsToDispForField.includes(val)) {
-                                                if (val === 'detail') {
-                                                    showMessage('Invalid Credentials!', 'failure');
-                                                }
-
-                                                return true;
-                                            }
-
-                                            return false;
-                                        })
-                                    ) {
+                                    if (loginRespInfo[2] === 401) {
+                                        showMessage('Invalid Credentials!', 'failure');
+                                    } else {
                                         showMessage('Server error occurred!', 'failure');
                                     }
                                 } else if (loginRespInfo[0] === 'success') {

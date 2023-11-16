@@ -1,4 +1,4 @@
-export function simpleHash(number: number | string) {
+export function simpleHash(number: number | string | unknown[]) {
     const input = number.toString();
 
     // Initialize the hash value

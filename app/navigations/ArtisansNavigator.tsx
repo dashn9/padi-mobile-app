@@ -10,8 +10,8 @@ export type ArtisanStackList = {
     ArtisanHomeScreen: undefined;
     ArtisansViewScreen: {
         serviceName: string;
-        artisansGroupName: string;
-        filters: Record<string, string | number>;
+        serviceGroupName: string;
+        serviceCode: string;
     };
     ArtisanViewScreen: {
         artisanId: number;
@@ -23,7 +23,7 @@ const ArtisanStack = createStackNavigator<ArtisanStackList>();
 const ArtisansStackkNavigator = () => (
     <ArtisanStack.Navigator screenOptions={{headerShown: false}} initialRouteName='ArtisanHomeScreen'>
         <ArtisanStack.Screen name='ArtisanHomeScreen' component={ArtisanHomeScreen} />
-        <ArtisanStack.Screen name='ArtisansViewScreen' component={ArtisansViewScreen} initialParams={{serviceName: 'electricity', artisansGroupName: 'electricians', filters: {}}} />
+        <ArtisanStack.Screen name='ArtisansViewScreen' component={ArtisansViewScreen} initialParams={{serviceName: 'Electricity', serviceGroupName: 'Electricians', serviceCode: 'electricity'}} />
         <ArtisanStack.Screen name='ArtisanViewScreen' component={ArtisanViewScreen} initialParams={{artisanId: 0}} />
     </ArtisanStack.Navigator>
 );

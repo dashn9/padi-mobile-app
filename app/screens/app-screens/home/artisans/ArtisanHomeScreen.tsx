@@ -6,15 +6,17 @@ import Screen from '../../../../components/screen';
 import * as metrics from '../../../../utils/metrics';
 import AppText from '../../../../components/text';
 import type {ArtisanHomeNavigationProp, ArtisanHomeScreenProps} from '../../../../navigations/ArtisansNavigator';
+import {useFetchServicesQuery} from '../../../../hooks/queries/useArtisanQuery';
+import {type Service} from '../../../../hooks/queries/useArtisanQuery';
 
-const services = [
+const backupServices = [
     {
         iconName: 'air-conditioner',
         iconColor: '#DDA503',
         iconBackDropColor: '#FFF9E8',
         serviceCode: 'ac_repair',
         serviceName: 'AC Repair',
-        artisansGroupName: 'AC Repairers',
+        serviceGroupName: 'AC Repairers',
     },
     {
         iconName: 'lightning-bolt',
@@ -22,7 +24,7 @@ const services = [
         iconBackDropColor: '#F6F9FF',
         serviceCode: 'electricity',
         serviceName: 'Electricity',
-        artisansGroupName: 'Electericians',
+        serviceGroupName: 'Electericians',
     },
     {
         iconName: 'pipe-leak',
@@ -30,7 +32,7 @@ const services = [
         iconBackDropColor: '#F5FFE9',
         serviceCode: 'plumbing',
         serviceName: 'Plumbing',
-        artisansGroupName: 'Plumbers',
+        serviceGroupName: 'Plumbers',
     },
     {
         iconName: 'hair-dryer',
@@ -38,15 +40,15 @@ const services = [
         iconBackDropColor: '#FBF6FF',
         serviceCode: 'beauty',
         serviceName: 'Beauty',
-        artisansGroupName: 'Beauticians',
+        serviceGroupName: 'Beauticians',
     },
 ];
-function artisanServices<Services extends Array<{iconName?: string; iconColor?: string; iconBackDropColor?: string; serviceCode: string; serviceName: string; artisansGroupName: string}>>(services: Services, navigation: ArtisanHomeNavigationProp) {
+function artisanServices(services: Service[], navigation: ArtisanHomeNavigationProp) {
     return services.map((value, index) => (
         <View key={index} style={styles.serviceContainer}>
             <Pressable
                 onPress={() => {
-                    navigation.navigate('ArtisansViewScreen', {serviceName: value.serviceName, artisansGroupName: value.artisansGroupName, filters: {}});
+                    navigation.navigate('ArtisansViewScreen', {serviceName: value.serviceName, serviceGroupName: value.serviceGroupName, serviceCode: value.serviceCode});
                 }}
             >
                 <View style={styles.serviceIconBackDrop}>
@@ -64,11 +66,12 @@ function artisanServices<Services extends Array<{iconName?: string; iconColor?: 
 }
 
 export default function ArtisansHomeScreen({navigation, route}: ArtisanHomeScreenProps) {
+    const services = useFetchServicesQuery().data;
     return (
         <Screen>
             <View style={styles.artisanHomeScreenContainer}>
                 <AppHeader>All Services</AppHeader>
-                <View style={styles.servicesContainer}>{artisanServices(services, navigation)}</View>
+                <View style={styles.servicesContainer}>{artisanServices(services ?? backupServices, navigation)}</View>
             </View>
         </Screen>
     );

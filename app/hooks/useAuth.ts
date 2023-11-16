@@ -1,5 +1,5 @@
 import {isAxiosError, isCancel} from 'axios';
-import {sendRequest} from '../apis/api';
+import {useNetwork} from '../apis/api';
 import * as SecureStore from 'expo-secure-store';
 
 import {isTokenValid, fetchIdFromToken} from '../utils/auth';
@@ -34,7 +34,7 @@ export interface OtpVerificationRequestData {
     otp: number;
 }
 
-type ObjResponseData = ['error' | 'success', Record<string, any>] | false;
+type ObjResponseData = ['error' | 'success', Record<string, any>, number | undefined] | false;
 
 export interface OtpStatusResponseData {
     detail: string;
@@ -42,7 +42,7 @@ export interface OtpStatusResponseData {
 
 function parseAxiosErrorForObjResp(error: any): ObjResponseData {
     if (isAxiosError(error)) {
-        return ['error', error.response?.data as Record<string, any>];
+        return ['error', error.response?.data as Record<string, any>, error?.response?.status];
     }
 
     return false;
@@ -52,6 +52,7 @@ function parseAxiosErrorForObjResp(error: any): ObjResponseData {
 // TO DO: Make inactive accounts via login to also be able to generate OTP if email and password is valid
 const useAuth = () => {
     const {user, setUser} = useAuthContext();
+    const {sendRequest} = useNetwork();
     useEffect(() => {
         if (checkIfIsUser(user)) {
             // Console.log(user);
@@ -82,7 +83,7 @@ const useAuth = () => {
     const nativeRegister = async (registrationData: RegistrationAuthData): Promise<ObjResponseData> => {
         try {
             const regData = await sendRequest<RegistrationAuthData, Record<string, any>>({urlId: 'register', method: 'POST', data: registrationData});
-            return ['success', regData];
+            return ['success', regData, 201];
         } catch (error) {
             return parseAxiosErrorForObjResp(error);
         }
@@ -109,7 +110,7 @@ const useAuth = () => {
                 }, 2000);
 
             // It returns an object because it doesn't need to share the Tokens with you
-            return ['success', {}];
+            return ['success', {}, 200];
         } catch (error) {
             console.log(error);
             return parseAxiosErrorForObjResp(error);
@@ -122,6 +123,7 @@ const useAuth = () => {
         }
     };
 
+    // This piece of code is very sensitive as it controls the user side effect. if you did not get any valid response or you got 401, log out and delete the user immediately: TODO
     const refreshAccessToken = async (onlyIfExpired = true) => {
         checkIfUserAuthenticated();
 
