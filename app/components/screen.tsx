@@ -1,12 +1,16 @@
 import React from 'react';
-import {SafeAreaView, StyleSheet} from 'react-native';
+import {SafeAreaView, View, StyleSheet} from 'react-native';
 import Constants from 'expo-constants';
 
 type ScreenProps = {
     children: React.ReactNode;
 };
 function Screen({children}: ScreenProps) {
-    return <SafeAreaView style={styles.container}>{children}</SafeAreaView>;
+    return (
+        <SafeAreaView style={styles.container}>
+            <View style={styles.innerContainer}>{children}</View>
+        </SafeAreaView>
+    );
 }
 
 const styles = StyleSheet.create({
@@ -17,6 +21,11 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff',
         alignItems: 'center',
         justifyContent: 'center',
+    },
+    innerContainer: {
+        width: '90%',
+        flex: 1,
+        overflow: 'hidden',
     },
 });
 

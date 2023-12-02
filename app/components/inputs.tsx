@@ -1,14 +1,16 @@
 import React, {type ChangeEvent, useState, useEffect} from 'react';
 import {StyleSheet, View, TextInput, Pressable} from 'react-native';
 import type {KeyboardTypeOptions, ViewStyle} from 'react-native';
+import DropDownPicker from 'react-native-dropdown-picker';
+import DatePicker from 'react-native-date-picker';
+import {AntDesign, MaterialCommunityIcons} from '@expo/vector-icons';
 
 import * as metrics from '../utils/metrics';
 import colors from '../config/colors';
 import fonts from '../config/fonts';
-import {AntDesign, MaterialCommunityIcons} from '@expo/vector-icons';
 import icons from '../config/icons';
 import AppText from './text';
-import DropDownPicker from 'react-native-dropdown-picker';
+import {formatDateToString} from '../utils/datetime';
 interface FormInputProps {
     inputLabel?: string;
     placeholder: string;
@@ -22,30 +24,84 @@ interface FormInputProps {
     inputContainerStyle?: ViewStyle;
     inputBoxStyle?: ViewStyle;
 }
+
+interface FormTextAreaProps extends FormInputProps {
+    maxLength?: number;
+}
+
+const parseError = (error: string | string[]) => {
+    const errors: React.ReactElement[] = [];
+    if (Array.isArray(error)) {
+        error.reduce((prev, curr, index) => {
+            prev.push(
+                <AppText key={index} style={styles.errorText}>
+                    {curr}
+                </AppText>
+            );
+            return prev;
+        }, errors);
+    } else {
+        errors.push(
+            <AppText key={0} style={styles.errorText}>
+                {error}
+            </AppText>
+        );
+    }
+
+    return errors;
+};
+
+export function FormTextArea({
+    inputLabel,
+    placeholder,
+    onChangeText,
+    error,
+    touched,
+    inputContainerStyle,
+    inputBoxStyle,
+    maxLength = 500, // Set a default max length (adjust as needed)
+}: FormTextAreaProps) {
+    const [text, setText] = useState('');
+
+    const handleTextChange = (newText: string) => {
+        if (newText.length <= maxLength) {
+            setText(newText);
+            if (onChangeText) {
+                onChangeText(newText);
+            }
+        }
+    };
+
+    return (
+        <View style={[styles.formMaterialBody, inputContainerStyle]}>
+            {inputLabel && <AppText style={styles.formInputLabel}>{inputLabel}</AppText>}
+            <View style={[styles.formTextInputBody, inputBoxStyle]}>
+                <TextInput
+                    multiline
+                    numberOfLines={5} // You can adjust the number of lines as needed
+                    autoCorrect={false}
+                    onChangeText={handleTextChange}
+                    style={styles.formTextInput}
+                    placeholder={placeholder}
+                    value={text}
+                />
+            </View>
+            <View style={styles.characterCountContainer}>
+                <AppText style={styles.characterCountText}>
+                    {text.length}/{maxLength}
+                </AppText>
+            </View>
+            {touched && error && parseError(error)}
+        </View>
+    );
+}
+
 export function FormInput({inputLabel, placeholder, textContentType, keyboardType, secureTextEntry = false, onChangeText, error, touched, inputContainerStyle, inputBoxStyle}: FormInputProps) {
     const [showPassword, setShowPassword] = useState(false);
 
     // Function to toggle the password visibility state
     const toggleShowPassword = () => {
         setShowPassword(!showPassword);
-    };
-
-    const parseError = (error: string | string[]) => {
-        const errors: React.ReactElement[] = [];
-        if (Array.isArray(error)) {
-            error.reduce((prev, curr, index) => {
-                prev.push(
-                    <AppText key={index} style={styles.errorText}>
-                        {curr}
-                    </AppText>
-                );
-                return prev;
-            }, errors);
-        } else {
-            errors.push(<AppText style={styles.errorText}>{error}</AppText>);
-        }
-
-        return errors;
     };
 
     return (
@@ -104,6 +160,53 @@ export function SearchableDropDown({items, value, setValue, placeholder, searchP
     const [stateItems, setItems] = useState<any[]>(items);
     const [open, setOpen] = useState(false);
     return <DropDownPicker open={open} setOpen={setOpen} style={styles.searchableDropDownContainer} dropDownContainerStyle={styles.searchableDropDown} listItemContainerStyle={styles.searchableDropDownListItemParentContainer} searchTextInputStyle={styles.searchableDropDownSearchInput} selectedItemContainerStyle={styles.searchableDropDownSelectedItemContainerStyle} selectedItemLabelStyle={styles.searchableDropDownSelectedItemLabelContainerStyle} items={stateItems} value={value} setValue={setValue} setItems={setItems} placeholder={placeholder} placeholderStyle={styles.dropDownPlaceholderStyle} activityIndicatorColor='#5188E3' searchable={true} searchPlaceholder={searchPlaceholder} />;
+}
+
+interface DatePickerProps {
+    mode: 'date' | 'datetime' | 'time';
+    maximumDate?: Date;
+    onUpdate?: (date: Date | string) => void;
+    parseToString?: boolean;
+    inputContainerStyle?: ViewStyle;
+}
+
+export function DatePickerCustom({inputContainerStyle, mode, onUpdate, parseToString, maximumDate}: DatePickerProps) {
+    const [date, setDate] = useState(new Date('2000-01-01'));
+    const [datePickerOpen, setDatePickerOpen] = useState(false);
+    useEffect(() => {
+        if (onUpdate) {
+            onUpdate(parseToString ? formatDateToString(date) : date);
+        }
+    }, [date]);
+    return (
+        <View style={[styles.formMaterialBody, inputContainerStyle]}>
+            <Pressable
+                onPress={() => {
+                    setDatePickerOpen(true);
+                }}
+            >
+                <View style={styles.formTextInputBody}>
+                    <AppText>{parseToString ? formatDateToString(date) : 'Select Date'}</AppText>
+
+                    <DatePicker
+                        modal
+                        maximumDate={maximumDate}
+                        open={datePickerOpen}
+                        date={date}
+                        onConfirm={date => {
+                            setDatePickerOpen(false);
+                            setDate(date);
+                        }}
+                        onCancel={() => {
+                            setDatePickerOpen(false);
+                        }}
+                        mode={mode}
+                    />
+                    <MaterialCommunityIcons name='calendar' size={icons.l} color={colors.inputIconColor} style={{marginLeft: 'auto'}} />
+                </View>
+            </Pressable>
+        </View>
+    );
 }
 
 // I created this custom hook for the SearchBar, and now, I feel the need not to use it. Upgrade and use if there is need to abstract and reuse some serious logic
@@ -194,4 +297,13 @@ const styles = StyleSheet.create({
         backgroundColor: colors.lightbgGreyColor,
     },
     dropDownPlaceholderStyle: {},
+
+    characterCountContainer: {
+        marginLeft: 'auto',
+        marginTop: metrics.verticalScale(4),
+    },
+    characterCountText: {
+        fontSize: fonts.small,
+        color: colors.primaryColor600B,
+    },
 });

@@ -1,8 +1,7 @@
 import React from 'react';
 import {createStackNavigator} from '@react-navigation/stack';
 
-import {LoginScreen, RegistrationScreen, ForgotPasswordScreen, OtpCodeScreen, ResetPasswordScreen} from '../screens/authentication-screens';
-import HomeScreen from '../screens/app-screens/home/HomeScreen';
+import {LoginScreen, RegistrationScreen, ForgotPasswordScreen, OtpCodeScreen, ResetPasswordScreen} from '../screens/authentication';
 
 export type AuthStackList = {
     SignIn: undefined;

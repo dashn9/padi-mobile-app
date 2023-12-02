@@ -61,7 +61,6 @@ function ForgotPasswordScreen() {
 const styles = StyleSheet.create({
     mainViewContainer: {
         flex: 1,
-        width: '85%',
         alignSelf: 'center',
         justifyContent: 'center',
     },

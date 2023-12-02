@@ -20,3 +20,9 @@ export function fetchObjectValuesRecursively(obj: Record<string, any>) {
 
     return values;
 }
+
+export function parseSelectableDataFromObject(rawArr: Array<Record<any, any>>, nameKey: string, valueKey: string) {
+    const selectableData = [];
+
+    return rawArr.map(selectable => ({label: String(selectable[nameKey]), value: String(selectable[valueKey])}));
+}

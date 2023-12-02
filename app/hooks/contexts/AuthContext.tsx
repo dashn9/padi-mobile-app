@@ -5,6 +5,9 @@ export interface User {
     firstName?: string;
     lastName?: string;
     email?: string;
+    phoneNumber?: string;
+    state?: string;
+    birthDate?: string;
     pushToken?: string;
     sessionID?: string;
 

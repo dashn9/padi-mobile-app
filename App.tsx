@@ -20,6 +20,7 @@ import 'expo-dev-client';
 // This code was added because for some reason atob and btoa(which are required by jwt-decode) are not present except when used in connection with browser
 import {decode, encode} from 'base-64';
 import useAuth from './app/hooks/useAuth';
+import {ChatMessagesDataContextProvider} from './app/hooks/contexts/ChatMessagesDataContext';
 
 if (!global.btoa) {
     global.btoa = encode;
@@ -69,7 +70,9 @@ export default function App(): ReactElement {
     return (
         <QueryClientProvider client={queryClient}>
             <AuthContextProvider>
-                <NavContainer />
+                <ChatMessagesDataContextProvider>
+                    <NavContainer />
+                </ChatMessagesDataContextProvider>
             </AuthContextProvider>
         </QueryClientProvider>
     );

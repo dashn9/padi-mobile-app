@@ -14,6 +14,7 @@ interface RequestOptions<T, K> {
     responseType?: 'json' | 'text' | 'blob' | 'arraybuffer'; // Add more as needed
     timeout?: number; // Request timeout in milliseconds
     transformResponse?: (responseData: K) => unknown;
+    urlAffix?: string;
 }
 
 const transformRequestData = <T>(requestData: T, {reformRequestDataKeys}: IapiEndpoint) => {
@@ -40,7 +41,7 @@ const mainRespTransformer = <K>(responseData: string, headers: AxiosResponseHead
 
 export const useNetwork = () => {
     const {user} = useAuthContext();
-    const sendRequest = async <T, K extends Record<string, any> | ArrayBuffer | string | void>({
+    const sendRequest = async <T, K extends Record<string, any> | ArrayBuffer | string | boolean | void>({
         urlId,
         method,
         headers = {},
@@ -49,11 +50,12 @@ export const useNetwork = () => {
         responseType = 'json',
         timeout = 5000, // Default timeout of 5 seconds
         transformResponse,
+        urlAffix = '',
     }: RequestOptions<T, K>): Promise<K> => {
         const api = apis[urlId];
         const config: AxiosRequestConfig = {
             method: method ?? api.method,
-            url: api.url,
+            url: api.url + urlAffix,
             // eslint-disable-next-line @typescript-eslint/naming-convention
             headers: {...api.headers, ...headers, Authorization: api.requireAuthToken ? 'Bearer ' + String(user?.access) : undefined},
             params: {...api.params, ...params},

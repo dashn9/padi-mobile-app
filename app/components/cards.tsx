@@ -8,6 +8,7 @@ import icons from '../config/icons';
 import {Header3, Header4, Subtitle2} from './headers';
 import AppText from './text';
 import fonts from '../config/fonts';
+import {UserImage} from './images';
 
 interface ServiceCardProps {
     iconName: 'linechart' | 'home' | 'tool';
@@ -83,17 +84,21 @@ export function HorizontalSnappingCards() {
 }
 
 interface ArtisanProfileListCardProps {
-    name: string;
+    firstName: string;
+    lastName: string;
     state: string;
     rating: number;
     reviewsCount: number;
 }
-export function ArtisanProfileListCard({name, state, rating, reviewsCount}: ArtisanProfileListCardProps) {
+export function ArtisanProfileListCard({firstName, lastName, state, rating, reviewsCount}: ArtisanProfileListCardProps) {
     return (
-        <View style={styles.artisanProfileListCardContainer}>
-            <View>
+        <View style={[styles.profileListCardContainer, styles.artisanProfileListCardContainer]}>
+            <View style={{flex: 0.2}}>
+                <UserImage initials={firstName[0] + lastName[0]} size={metrics.moderateScale(50)} containerStyle={{borderWidth: 0.5}} />
+            </View>
+            <View style={{flex: 0.8}}>
                 <View style={styles.artisanProfilListCardInnerContainer}>
-                    <AppText style={styles.artisansProfileListCardNameTextStyle}>{name}</AppText>
+                    <AppText style={styles.artisansProfileListCardNameTextStyle}>{firstName + ' ' + lastName}</AppText>
                     <View style={styles.artisanProfileListCardRatingContainer}>
                         <AntDesign name='star' color={colors.ratingColor} size={metrics.moderateScale(icons.xs)} />
                         <AppText> {rating}</AppText>
@@ -116,7 +121,7 @@ interface IratingCardProps {
 }
 export function RatingCard({userId}: IratingCardProps) {
     return (
-        <View style={styles.artisanProfileListCardContainer}>
+        <View style={styles.profileListCardContainer}>
             <View>
                 <View style={styles.artisanProfilListCardInnerContainer}>
                     <AppText style={styles.artisansProfileListCardNameTextStyle}>James Guidetti</AppText>
@@ -198,13 +203,17 @@ const styles = StyleSheet.create({
         borderRadius: 10,
     },
 
-    // Artisan Profile List Card
-    artisanProfileListCardContainer: {
+    profileListCardContainer: {
         width: '100%',
         backgroundColor: colors.formInputBgColor2,
         marginTop: metrics.verticalScale(16),
         padding: metrics.moderateScale(16),
         borderRadius: 8,
+    },
+
+    // Artisan Profile List Card
+    artisanProfileListCardContainer: {
+        flexDirection: 'row',
     },
     artisanProfilListCardInnerContainer: {
         flexDirection: 'row',

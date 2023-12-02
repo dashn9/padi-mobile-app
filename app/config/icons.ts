@@ -21,6 +21,32 @@ interface Icons {
     xl18: number;
     xl20: number;
     xl22: number;
+    xl24: number;
+    xl26: number;
+    xl28: number;
+    xl30: number;
+    xl32: number;
+    xl34: number;
+    xl36: number;
+    xl38: number;
+    xl40: number;
+    xl42: number;
+    xl44: number;
+    xl46: number;
+    xl48: number;
+    xl50: number;
+    xl52: number;
+    xl54: number;
+    xl56: number;
+    xl58: number;
+    xl60: number;
+    xl62: number;
+    xl64: number;
+    xl66: number;
+    xl68: number;
+    xl70: number;
+    xl80: number;
+    xl100: number;
 }
 
 const icons: Icons = {
@@ -46,5 +72,31 @@ const icons: Icons = {
     xl18: 44,
     xl20: 46,
     xl22: 48,
+    xl24: 50,
+    xl26: 52,
+    xl28: 54,
+    xl30: 56,
+    xl32: 58,
+    xl34: 60,
+    xl36: 62,
+    xl38: 64,
+    xl40: 66,
+    xl42: 68,
+    xl44: 70,
+    xl46: 72,
+    xl48: 74,
+    xl50: 78,
+    xl52: 80,
+    xl54: 82,
+    xl56: 84,
+    xl58: 86,
+    xl60: 88,
+    xl62: 90,
+    xl64: 92,
+    xl66: 94,
+    xl68: 96,
+    xl70: 98,
+    xl80: 108,
+    xl100: 128,
 };
 export default icons;

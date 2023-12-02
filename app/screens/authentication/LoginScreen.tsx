@@ -73,12 +73,12 @@ function LoginScreen() {
                         {({handleChange, handleSubmit, errors, touched}) => (
                             <>
                                 <View style={styles.loginInputsContainer}>
-                                    <FormInput onChangeText={handleChange('email')} placeholder='johndoe@gmail.com' textContentType='emailAddress' keyboardType='email-address' inputLabel='E-mail' error={errors.email} touched={touched.email} />
-                                    <FormInput onChangeText={handleChange('password')} placeholder='******' textContentType='password' secureTextEntry inputLabel='Password' error={errors.password} touched={touched.password} />
+                                    <FormInput key={1} onChangeText={handleChange('email')} placeholder='johndoe@gmail.com' textContentType='emailAddress' keyboardType='email-address' inputLabel='E-mail' error={errors.email} touched={touched.email} />
+                                    <FormInput key={2} onChangeText={handleChange('password')} placeholder='******' textContentType='password' secureTextEntry inputLabel='Password' error={errors.password} touched={touched.password} />
                                 </View>
                                 <ForgotPassword />
                                 <View style={styles.loginTriggersContainer}>
-                                    <FormButton text='Sign In' onPress={handleSubmit} isApiLoading={isNativeLoginApiLoading} />
+                                    <FormButton text='Sign In' onPress={handleSubmit} isLoading={isNativeLoginApiLoading} />
                                     <FormButton2 text='Sign in with Google' iconName='google' />
                                 </View>
                                 <DonotHaveAnAccount />
@@ -94,7 +94,6 @@ function LoginScreen() {
 const styles = StyleSheet.create({
     mainViewContainer: {
         flex: 1,
-        width: '85%',
         alignSelf: 'center',
     },
     loginInputsContainer: {

@@ -189,7 +189,7 @@ const OtpCodeScreen: React.FC<OtpCodeScreenProps> = ({navigation, route}: OtpCod
                         <Text style={styles.backspaceButtonText}>←</Text>
                     </TouchableOpacity>
                 </View>
-                <FormButton onPress={onCodeSubmit} text='Proceed' isApiLoading={isOtpVerificationApiLoading} />
+                <FormButton onPress={onCodeSubmit} text='Proceed' isLoading={isOtpVerificationApiLoading} />
                 {email && <OtpResendOption email={email} showMessage={showMessage} />}
             </View>
         </Screen>
@@ -201,7 +201,6 @@ const styles = StyleSheet.create({
         flex: 1,
         alignSelf: 'center',
         justifyContent: 'center',
-        width: '85%',
     },
     otpCodeContainer: {
         flexDirection: 'row',

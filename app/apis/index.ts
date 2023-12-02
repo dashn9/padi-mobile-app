@@ -1,5 +1,5 @@
 import authentication from './authentication';
-import {services, artisans} from './artisans';
+import {services, artisans} from './artisan';
 import images from './images';
 
 const apis = {

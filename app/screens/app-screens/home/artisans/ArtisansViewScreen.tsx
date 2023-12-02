@@ -21,7 +21,7 @@ function ArtisansViewScreen({route, navigation}: ArtisansViewScreenProps) {
     const [searchValue, setSearchValue] = useState('');
     const [stateValue, setStateValue] = useState('');
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    const {results, isPaginationLoading, goForward} = usePageNumberPagination(useFetchArtisansPaginatedQuery, true, {search: searchValue, filters: {services__service_code__in: route.params.serviceCode, state: stateValue}});
+    const {results, isPaginationLoading, goForward} = usePageNumberPagination(useFetchArtisansPaginatedQuery, true, {search: searchValue, filters: {services__service_code__in: route.params.serviceCode, user__state: stateValue}});
 
     const updateSearchValue = (searchValue: string) => {
         setSearchValue(searchValue);
@@ -44,7 +44,7 @@ function ArtisansViewScreen({route, navigation}: ArtisansViewScreenProps) {
                 navigation.navigate('ArtisanViewScreen', {artisanId: item.id});
             }}
         >
-            <ArtisanProfileListCard name={`${item.firstName} ${item.lastName}`} state={item.stateFull} rating={4.5} reviewsCount={20} />
+            <ArtisanProfileListCard firstName={item.firstName} lastName={item.lastName} state={item.stateFull} rating={4.5} reviewsCount={20} />
         </Pressable>
     );
 
@@ -67,7 +67,6 @@ function ArtisansViewScreen({route, navigation}: ArtisansViewScreenProps) {
 const styles = StyleSheet.create({
     artisansViewScreenContainer: {
         flex: 1,
-        width: '90%',
     },
     artisansViewHeaderContainer: {
         zIndex: 2,

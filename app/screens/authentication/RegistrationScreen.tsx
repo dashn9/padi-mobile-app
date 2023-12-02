@@ -95,7 +95,7 @@ function RegistrationScreen() {
                                     <FormInput onChangeText={handleChange('password')} placeholder='******' textContentType='password' secureTextEntry inputLabel='Create Password' error={errors.password} touched={touched.password} />
                                 </View>
                                 <View style={styles.registrationTriggersContainer}>
-                                    <FormButton text='Sign Up' onPress={handleSubmit} isApiLoading={isNativeRegistrationApiLoading} />
+                                    <FormButton text='Sign Up' onPress={handleSubmit} isLoading={isNativeRegistrationApiLoading} />
                                     <FormButton2 text='Sign in with Google' iconName='google' />
                                 </View>
                                 <HaveAnAccount />
@@ -111,7 +111,6 @@ function RegistrationScreen() {
 const styles = StyleSheet.create({
     mainViewContainer: {
         flex: 1,
-        width: '85%',
         alignSelf: 'center',
     },
     registrationInputsContainer: {

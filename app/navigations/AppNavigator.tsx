@@ -6,6 +6,7 @@ import colors from '../config/colors';
 import {createStackNavigator} from '@react-navigation/stack';
 import ArtisansStackkNavigator from './ArtisansNavigator';
 import MessagesStackkNavigator from './MessagesNavigator';
+import AccountStackNavigator from './AccountNavigator';
 
 export type AppNavList = {
     HomeScreenNavigator: undefined;
@@ -61,7 +62,7 @@ const AppNavigator = () => (
         />
         <Tab.Screen
             name='AccountScreen'
-            component={HomeScreen}
+            component={AccountStackNavigator}
             options={{
                 tabBarLabel: 'Account',
                 tabBarIcon({color, size}) {

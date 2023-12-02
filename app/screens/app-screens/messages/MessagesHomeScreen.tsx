@@ -136,7 +136,6 @@ function MessagesHomeScreen({navigation, route}: MessagesHomeScreenProps) {
 const styles = StyleSheet.create({
     messagesHomeScreenContainer: {
         flex: 1,
-        width: '90%',
     },
 
     // Chat Bar

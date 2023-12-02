@@ -22,5 +22,11 @@ const colors: Record<string, string> = {
     defaultTextColor: '#0E0E0E',
     boxShadow: '#0000001A',
     white: '#FFFFFF',
+    successGreen: '#EAFBF1',
+    successGreenBold: '#1E944D',
+    cautionBrown: '#FDF2E7',
+    cautionBrownBold: '#D66F0F',
+    failureRedBold: '#CA1B1B',
+    failureRed: '#FDF2E7',
 };
 export default colors;

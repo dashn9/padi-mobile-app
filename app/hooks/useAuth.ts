@@ -1,4 +1,4 @@
-import {isAxiosError, isCancel} from 'axios';
+import {isAxiosError} from 'axios';
 import {useNetwork} from '../apis/api';
 import * as SecureStore from 'expo-secure-store';
 
@@ -6,6 +6,8 @@ import {isTokenValid, fetchIdFromToken} from '../utils/auth';
 import {checkIfIsUser, useAuthContext} from './contexts/AuthContext';
 import {UserNotAuthenticated} from '../errors/authErrors';
 import {useEffect} from 'react';
+import {userAuthStorageKey} from '../config/env';
+import {useFetchUserDetailsQuery} from './queries/useUserQuery';
 export interface RegistrationAuthData {
     full_name: string;
     email: string;
@@ -53,6 +55,7 @@ function parseAxiosErrorForObjResp(error: any): ObjResponseData {
 const useAuth = () => {
     const {user, setUser} = useAuthContext();
     const {sendRequest} = useNetwork();
+    const userDetails = useFetchUserDetailsQuery();
     useEffect(() => {
         if (checkIfIsUser(user)) {
             // Console.log(user);
@@ -64,15 +67,17 @@ const useAuth = () => {
     }, [user]);
     const saveUser = async () => {
         // Prevents the useEffect hook from overwriting store data when called
-        await SecureStore.setItemAsync('userAuthDetails', JSON.stringify({...user}));
+        await SecureStore.setItemAsync(userAuthStorageKey, JSON.stringify({...user}));
     };
 
     const retrieveAndSetUser = async () => {
         try {
-            const user: unknown = JSON.parse((await SecureStore.getItemAsync('userAuthDetails'))!);
+            const user: unknown = JSON.parse((await SecureStore.getItemAsync(userAuthStorageKey))!);
             // Console.log(await SecureStore.getItemAsync('userAuthDetails'));
             if (checkIfIsUser(user)) {
-                setUser(user);
+                setUser({...user});
+                void userDetails.refetch();
+                setUser({...user, ...userDetails.data});
             }
         } catch (e) {
             console.log(e);
@@ -92,7 +97,7 @@ const useAuth = () => {
     // Will be used alongside logout.
     const resetAuthentication = async () => {
         setUser(undefined);
-        await SecureStore.deleteItemAsync('userAuthDetails');
+        await SecureStore.deleteItemAsync(userAuthStorageKey);
     };
 
     const nativeLogin = async (loginData: LoginAuthRequestData): Promise<ObjResponseData> => {
@@ -166,7 +171,7 @@ const useAuth = () => {
 
     const generateOtp = async (otpGenerationData: OtpGenerationRequestData) => {
         try {
-            const otpGenerationStatus = await sendRequest<OtpGenerationRequestData, OtpStatusResponseData>({urlId: 'generate-otp', method: 'PUT', data: otpGenerationData});
+            const otpGenerationStatus = await sendRequest<OtpGenerationRequestData, OtpStatusResponseData>({urlId: 'generate-otp', data: otpGenerationData});
             return ['success', otpGenerationStatus];
         } catch (error) {
             return parseAxiosErrorForObjResp(error);
@@ -175,7 +180,7 @@ const useAuth = () => {
 
     const verifyOtp = async (otpVerificationData: OtpVerificationRequestData) => {
         try {
-            const otpVerificationStatus = await sendRequest<OtpVerificationRequestData, OtpStatusResponseData>({urlId: 'verify-otp', method: 'PUT', data: otpVerificationData});
+            const otpVerificationStatus = await sendRequest<OtpVerificationRequestData, OtpStatusResponseData>({urlId: 'verify-otp', data: otpVerificationData});
             return ['success', otpVerificationStatus];
         } catch (error) {
             return parseAxiosErrorForObjResp(error);

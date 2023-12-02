@@ -16,6 +16,7 @@ const backupServices = [
         iconBackDropColor: '#FFF9E8',
         serviceCode: 'ac_repair',
         serviceName: 'AC Repair',
+        serviceIndividualName: 'AC Repairers',
         serviceGroupName: 'AC Repairers',
     },
     {
@@ -24,6 +25,7 @@ const backupServices = [
         iconBackDropColor: '#F6F9FF',
         serviceCode: 'electricity',
         serviceName: 'Electricity',
+        serviceIndividualName: 'Electericians',
         serviceGroupName: 'Electericians',
     },
     {
@@ -32,6 +34,7 @@ const backupServices = [
         iconBackDropColor: '#F5FFE9',
         serviceCode: 'plumbing',
         serviceName: 'Plumbing',
+        serviceIndividualName: 'Plumbers',
         serviceGroupName: 'Plumbers',
     },
     {
@@ -40,6 +43,7 @@ const backupServices = [
         iconBackDropColor: '#FBF6FF',
         serviceCode: 'beauty',
         serviceName: 'Beauty',
+        serviceIndividualName: 'Beauticians',
         serviceGroupName: 'Beauticians',
     },
 ];
@@ -80,7 +84,6 @@ export default function ArtisansHomeScreen({navigation, route}: ArtisanHomeScree
 const styles = StyleSheet.create({
     artisanHomeScreenContainer: {
         flex: 1,
-        width: '90%',
     },
     servicesContainer: {
         marginTop: metrics.verticalScale(60),
