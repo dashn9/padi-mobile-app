@@ -1,5 +1,6 @@
 import React, {useLayoutEffect, useRef} from 'react';
 import {View, StyleSheet, Dimensions, ScrollView, Pressable} from 'react-native';
+import {useNavigation} from '@react-navigation/native';
 
 import colors from '../config/colors';
 import * as metrics from '../utils/metrics';
@@ -9,6 +10,7 @@ import {Header3, Header4, Subtitle2} from './headers';
 import AppText from './text';
 import fonts from '../config/fonts';
 import {UserImage} from './images';
+import {MessagesStackList} from '../navigations/MessagesNavigator';
 
 interface ServiceCardProps {
     iconName: 'linechart' | 'home' | 'tool';
@@ -144,12 +146,13 @@ interface ImessageUserCardProps {
     userId: number;
 }
 export function MessageUserCardProps({userId}: ImessageUserCardProps) {
+    const chatNavigation = useNavigation<MessagesStackList>();
     return (
         <View style={styles.messageUserCardContainer}>
             <View style={styles.sendToMessageContainer}>
                 <AppText style={{fontSize: fonts.medium}}>Message</AppText>
             </View>
-            <Pressable style={styles.callButton}>
+            <Pressable style={styles.callButton} onPress={() => chatNavigation.}>
                 <Feather name='phone' size={icons.xl6} color={colors.white} />
             </Pressable>
         </View>

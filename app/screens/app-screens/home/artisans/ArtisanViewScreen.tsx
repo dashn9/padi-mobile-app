@@ -2,6 +2,8 @@ import React from 'react';
 import {View, StyleSheet} from 'react-native';
 import {MaterialCommunityIcons} from '@expo/vector-icons';
 
+import {useNavigation} from '@react-navigation/native';
+
 import Screen from '../../../../components/screen';
 import AppText from '../../../../components/text';
 import {Header3, Subtitle2} from '../../../../components/headers';

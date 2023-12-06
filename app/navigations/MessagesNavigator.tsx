@@ -6,6 +6,9 @@ import type {NativeStackNavigationProp, NativeStackScreenProps} from '@react-nav
 
 export type MessagesStackList = {
     MessagesHomeScreen: undefined;
+    DirectMessageChatScreen: {
+        recipientId: number; // Technically the user id of the person you want to chat with
+    };
 };
 
 const MessagesStack = createStackNavigator<MessagesStackList>();
