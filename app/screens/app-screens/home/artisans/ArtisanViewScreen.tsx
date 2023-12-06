@@ -2,6 +2,8 @@ import React from 'react';
 import {View, StyleSheet} from 'react-native';
 import {MaterialCommunityIcons} from '@expo/vector-icons';
 
+import {useNavigation} from '@react-navigation/native';
+
 import Screen from '../../../../components/screen';
 import AppText from '../../../../components/text';
 import {Header3, Subtitle2} from '../../../../components/headers';
@@ -70,7 +72,7 @@ function ArtisanViewScreen({route}: ArtisanViewScreenProps) {
                     </View>
                 </ScrollView>
                 <View style={styles.bottomView}>
-                    <MessageUserCardProps userId={0} />
+                    <MessageUserCardProps userId={artisanProfile?.userId ?? -1} />
                 </View>
             </View>
         </Screen>

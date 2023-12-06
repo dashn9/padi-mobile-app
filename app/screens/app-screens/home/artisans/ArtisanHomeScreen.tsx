@@ -95,6 +95,7 @@ const styles = StyleSheet.create({
         alignSelf: 'flex-start',
     },
     serviceIconBackDrop: {
+        marginTop: metrics.verticalScale(6),
         padding: metrics.moderateScale(14),
         borderRadius: 50,
         alignSelf: 'center',
@@ -105,5 +106,6 @@ const styles = StyleSheet.create({
         fontFamily: 'karlaSemiBold',
         fontWeight: '200',
         color: '#41405D',
+        textAlign: 'center',
     },
 });

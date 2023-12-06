@@ -24,8 +24,8 @@ export interface IapiEndpoint extends reformDataKeysI {
     description?: string;
 }
 
-export const API_BASE_HOST = 'http://127.0.0.1:8000';
-export const WEBSOCKET_BASE_HOST = 'ws://127.0.0.1:8000';
+export const API_BASE_HOST = 'http://10.0.2.2:8000';
+export const WEBSOCKET_BASE_HOST = 'ws://10.0.2.2:8000';
 export const WEBSOCKET_BASE_URL = WEBSOCKET_BASE_HOST + '/ws/chat';
 
 // This host api is used for generating avatars

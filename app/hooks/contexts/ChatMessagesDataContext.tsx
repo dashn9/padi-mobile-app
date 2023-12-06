@@ -3,8 +3,9 @@ import {primaryChatKey} from '../../config/env';
 
 export interface ChatMessage {
     // This senderId would be useful, especially in groups
-    senderId: number;
-    messageType?: string;
+    senderId: number | 'server';
+    status: 401 | 200;
+    messageType: string;
     messageBody: string;
     senderTimestamp: string;
 }
@@ -14,6 +15,10 @@ interface ChatActions {
     payload: unknown;
 }
 
+export function isChatMessage(obj: any): obj is ChatMessage {
+    return typeof obj === 'object' && (obj.senderId === 'server' || typeof obj.senderId === 'number') && (obj.status === 401 || obj.status === 200) && typeof obj.messageType === 'string' && typeof obj.messageBody === 'string' && typeof obj.senderTimestamp === 'string';
+}
+
 // The key is the roomId, purposely named it roomId, because there is a possibility of it extending beyond other users and into groups
 // Technically, because only one-on-one messaging is used, the roomId which is technically the user id of the recipient, it will always be a number.
 // If in the future Group Messages was decided to be added, it most likely would be a string with the 'group-' preifx.
@@ -21,7 +26,8 @@ export type Chats = Record<number | string, ChatMessage[]>;
 
 export interface ChatContext {
     websocketConnection: WebSocket | undefined;
-    websocketConnectionReceiveEventCallbacks: Array<(chatObject: ChatContext, message: MessageEvent<ChatMessage>) => void>;
+    websocketConnectionReceiveEventCallbacks: Record<string, (chatObject: ChatContext, messageEv: MessageEvent, message: ChatMessage) => void>;
+    websocketConnectionCloseEventCallbacks: Record<string, (chatObject: ChatContext, closeEv: CloseEvent) => void>;
     chats: Chats;
     chatsDispatcher: React.Dispatch<ChatActions>;
     chatPersistentSaver: () => boolean;
@@ -58,7 +64,8 @@ export const useCreateChatMessagingObject = (key = primaryChatKey): ChatContext 
 
     return {
         websocketConnection: undefined,
-        websocketConnectionReceiveEventCallbacks: [],
+        websocketConnectionReceiveEventCallbacks: {},
+        websocketConnectionCloseEventCallbacks: {},
         chatsDispatcher,
         chats,
         chatPersistentFetcher() {

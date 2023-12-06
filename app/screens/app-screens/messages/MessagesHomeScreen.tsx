@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {View, StyleSheet, ScrollView} from 'react-native';
 import type {MessagesHomeScreenProps} from '../../../navigations/MessagesNavigator';
 import Screen from '../../../components/screen';
@@ -9,6 +9,9 @@ import {formatAmPm} from '../../../utils/datetime';
 import {NewMessagesCountBadge, TagBadge} from '../../../components/badges';
 import colors from '../../../config/colors';
 import * as metrics from '../../../utils/metrics';
+import {useMessaging} from '../../../hooks/useChatMessaging';
+import {type ChatContext, type ChatMessage} from '../../../hooks/contexts/ChatMessagesDataContext';
+import {useMessage, Message2} from '../../../components/messages';
 
 // This is a custom hook, seperate all hooks into their own folder
 // This is obviously not the full coontents of the message
@@ -98,12 +101,28 @@ function ChatBar({userId, userTypingState, userOnlineState, recentChatMessage, n
 }
 
 function MessagesHomeScreen({navigation, route}: MessagesHomeScreenProps) {
+    const {isVisible, message, messageStatus, showMessage, hideMessage} = useMessage();
+    const chatMessaging = useMessaging();
+
     const searchSubmit = (searchValue: string) => searchValue;
 
     const {searchValue, updateSearchValue, performSearch} = useSearch(searchSubmit);
 
     // Storage for all Chat Bars states controllers
     const chatsControl: Record<number | string, IchatBarStatesControl> = {};
+
+    const renderError = (chatObject: ChatContext, event: MessageEvent, message: ChatMessage) => {
+        if (message.senderId === 'server') {
+            if (message.status === 401) {
+                showMessage('Unauthorized: Try signing in again', 'caution');
+            }
+        }
+    };
+
+    useEffect(() => {
+        chatMessaging.connect();
+        chatMessaging.attachListenerToWebsocketReceiveEvent(renderError);
+    }, []);
 
     const activeChatsElements = [];
     for (let i = 0; i < 6; i++) {
@@ -120,6 +139,7 @@ function MessagesHomeScreen({navigation, route}: MessagesHomeScreenProps) {
 
     return (
         <Screen>
+            <Message2 message={message} status={messageStatus} isVisible={isVisible} onHide={hideMessage} />
             <View style={styles.messagesHomeScreenContainer}>
                 <View>
                     <AppHeader>Inbox</AppHeader>

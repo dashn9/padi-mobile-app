@@ -23,6 +23,7 @@ export interface ArtisanLight {
 }
 
 export interface ArtisanProfile extends ArtisanLight {
+    userId: number;
     firstName: string;
     lastName: string;
     bio: string;

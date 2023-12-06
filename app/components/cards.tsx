@@ -1,5 +1,6 @@
 import React, {useLayoutEffect, useRef} from 'react';
 import {View, StyleSheet, Dimensions, ScrollView, Pressable} from 'react-native';
+import {useNavigation} from '@react-navigation/native';
 
 import colors from '../config/colors';
 import * as metrics from '../utils/metrics';
@@ -9,6 +10,8 @@ import {Header3, Header4, Subtitle2} from './headers';
 import AppText from './text';
 import fonts from '../config/fonts';
 import {UserImage} from './images';
+import {type DirectMessageChatNavigationProp} from '../navigations/MessagesNavigator';
+import {TextInput} from 'react-native-gesture-handler';
 
 interface ServiceCardProps {
     iconName: 'linechart' | 'home' | 'tool';
@@ -143,15 +146,39 @@ export function RatingCard({userId}: IratingCardProps) {
 interface ImessageUserCardProps {
     userId: number;
 }
-export function MessageUserCardProps({userId}: ImessageUserCardProps) {
+export function MessageUserCardProps<NavigationProp extends DirectMessageChatNavigationProp>({userId}: ImessageUserCardProps) {
+    const chatNavigation = useNavigation<NavigationProp>();
     return (
         <View style={styles.messageUserCardContainer}>
-            <View style={styles.sendToMessageContainer}>
+            <Pressable
+                style={styles.sendToMessageContainer}
+                onPress={() => {
+                    chatNavigation.navigate('DirectMessageChatScreen', {recipientId: userId});
+                }}
+            >
                 <AppText style={{fontSize: fonts.medium}}>Message</AppText>
-            </View>
+            </Pressable>
             <Pressable style={styles.callButton}>
                 <Feather name='phone' size={icons.xl6} color={colors.white} />
             </Pressable>
+        </View>
+    );
+}
+
+export interface SendChatMessageControlProps {
+    messageSend: (message: string) => void;
+}
+export function SendChatMessageControl({messageSend}: SendChatMessageControlProps) {
+    return (
+        <View>
+            <View>
+                <TextInput placeholder='Message' />
+            </View>
+            <View>
+                <Pressable>
+                    <AppText>Send</AppText>
+                </Pressable>
+            </View>
         </View>
     );
 }
