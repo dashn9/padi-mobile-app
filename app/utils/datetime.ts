@@ -1,6 +1,22 @@
-export function formatAmPm(date: Date) {
-    let hours = date.getHours();
-    let minutes: string | number = date.getMinutes();
+export function convertUtcDateToLocalDate(date: Date) {
+    const newDate = new Date(date.getTime() + (date.getTimezoneOffset() * 60 * 1000));
+
+    const offset = date.getTimezoneOffset() / 60;
+    const hours = date.getHours();
+
+    newDate.setHours(hours - offset);
+
+    return newDate;
+}
+
+export function formatAmPm(date: Date, utc = false) {
+    let newDate = date;
+    if (utc) {
+        newDate = convertUtcDateToLocalDate(date);
+    }
+
+    let hours = newDate.getHours();
+    let minutes: string | number = newDate.getMinutes();
     const ampm = hours >= 12 ? 'pm' : 'am';
     hours %= 12;
     hours = hours ? hours : 12; // The hour '0' should be '12'
@@ -20,8 +36,8 @@ export function fetchNoOfMonths(dateString: string) {
     return ((currentDate.getFullYear() - date.getFullYear()) * 12) + (currentDate.getMonth() - date.getMonth());
 }
 
-export function formatDateTimeStringWithTimezone() {
-    const date = new Date();
+export function formatDateTimeStringWithTimezone(dateToFormat?: Date) {
+    const date = dateToFormat ?? new Date();
 
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based

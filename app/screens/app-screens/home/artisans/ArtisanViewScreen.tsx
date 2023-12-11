@@ -72,7 +72,7 @@ function ArtisanViewScreen({route}: ArtisanViewScreenProps) {
                     </View>
                 </ScrollView>
                 <View style={styles.bottomView}>
-                    <MessageUserCardProps userId={0} />
+                    <MessageUserCardProps userId={artisanProfile?.userId ?? -1} />
                 </View>
             </View>
         </Screen>

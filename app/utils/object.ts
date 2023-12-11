@@ -26,3 +26,13 @@ export function parseSelectableDataFromObject(rawArr: Array<Record<any, any>>, n
 
     return rawArr.map(selectable => ({label: String(selectable[nameKey]), value: String(selectable[valueKey])}));
 }
+
+export function isObjectEmpty(obj: Record<string, any>) {
+    for (const prop in obj) {
+        if (Object.hasOwn(obj, prop)) {
+            return false;
+        }
+    }
+
+    return true;
+}

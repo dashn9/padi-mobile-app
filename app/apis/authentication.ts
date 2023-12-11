@@ -22,6 +22,13 @@ const users: Record<string, IapiEndpoint> = {
         method: 'POST',
     },
     'fetch-user-details': {
+        url: API_BASE_HOST + '/auth/users/',
+        name: 'Fetch User Account Details',
+        requireAuthToken: true,
+        method: 'GET',
+        ...reformDataKeys,
+    },
+    'fetch-my-user-details': {
         url: API_BASE_HOST + '/auth/users/me/',
         name: 'Fetch User Account Details',
         requireAuthToken: true,

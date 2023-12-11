@@ -7,7 +7,7 @@ import {checkIfIsUser, useAuthContext} from './contexts/AuthContext';
 import {UserNotAuthenticated} from '../errors/authErrors';
 import {useEffect} from 'react';
 import {userAuthStorageKey} from '../config/env';
-import {useFetchUserDetailsQuery} from './queries/useUserQuery';
+import {useFetchMyUserDetailsQuery} from './queries/useUserQuery';
 export interface RegistrationAuthData {
     full_name: string;
     email: string;
@@ -55,7 +55,7 @@ function parseAxiosErrorForObjResp(error: any): ObjResponseData {
 const useAuth = () => {
     const {user, setUser} = useAuthContext();
     const {sendRequest} = useNetwork();
-    const userDetails = useFetchUserDetailsQuery();
+    const userDetails = useFetchMyUserDetailsQuery();
     useEffect(() => {
         if (checkIfIsUser(user)) {
             // Console.log(user);

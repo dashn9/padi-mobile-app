@@ -10,8 +10,9 @@ import {NewMessagesCountBadge, TagBadge} from '../../../components/badges';
 import colors from '../../../config/colors';
 import * as metrics from '../../../utils/metrics';
 import {useMessaging} from '../../../hooks/useChatMessaging';
-import {type ChatContext, type ChatMessage} from '../../../hooks/contexts/ChatMessagesDataContext';
+import {useChatMessagesDataContext, type ChatContext, type IncomingChatMessage, type OutgoingChatMessage} from '../../../hooks/contexts/ChatMessagesDataContext';
 import {useMessage, Message2} from '../../../components/messages';
+import {primaryChatKey} from '../../../config/env';
 
 // This is a custom hook, seperate all hooks into their own folder
 // This is obviously not the full coontents of the message
@@ -69,14 +70,12 @@ interface IchatBarStatesControl {
 }
 interface IchatBarProps {
     userId: number;
-    // States
-    userTypingState: boolean;
-    userOnlineState: TuserOnlineStates;
-    recentChatMessage: TchatBarMessage;
-    newMessagesCount: number;
 }
 
-function ChatBar({userId, userTypingState, userOnlineState, recentChatMessage, newMessagesCount}: IchatBarProps) {
+function ChatBar({userId}: IchatBarProps) {
+    const {chatsMeta, chats} = useChatMessagesDataContext()[primaryChatKey];
+    const chatMeta = chatsMeta[userId];
+    const lastChatMessage = chats[userId][chats[userId].length - 1];
     return (
         <View style={styles.chatBarContainer}>
             <View>{/** User image goes into this View */}</View>
@@ -89,20 +88,23 @@ function ChatBar({userId, userTypingState, userOnlineState, recentChatMessage, n
                         <TagBadge>Plumber</TagBadge>
                     </View>
                 </View>
-                <AppText style={[styles.chatBarRecentMessageText, {color: userTypingState ? colors.primaryColor600B : colors.subtitleColor}]}>{userTypingState ? 'Typing..........' : recentChatMessage.messageBody}</AppText>
+                <AppText style={[styles.chatBarRecentMessageText, {color: false ? colors.primaryColor600B : colors.subtitleColor}]}>{false ? 'Typing..........' : lastChatMessage.messageBody}</AppText>
             </View>
             <View style={styles.chatBarMessageInformation}>
-                {newMessagesCount > 0 ? <NewMessagesCountBadge count={newMessagesCount} /> : null}
+                {chatMeta?.unreadMessagesCount > 0 ? <NewMessagesCountBadge count={chatMeta.unreadMessagesCount} /> : null}
                 {/** TODO: Still have to update the time so it shows the date instead if the t */}
-                <AppText style={{color: newMessagesCount > 0 ? colors.primaryColor600B : 'black'}}>{formatAmPm(recentChatMessage.dateSent)}</AppText>
+                <AppText style={{color: chatMeta?.unreadMessagesCount > 0 ? colors.primaryColor600B : 'black'}}>{formatAmPm(new Date(lastChatMessage.senderTimestamp.slice(0, -3)), 'senderId' in lastChatMessage)}</AppText>
             </View>
         </View>
     );
 }
 
 function MessagesHomeScreen({navigation, route}: MessagesHomeScreenProps) {
+    const {chats} = useChatMessagesDataContext()[primaryChatKey];
     const {isVisible, message, messageStatus, showMessage, hideMessage} = useMessage();
     const chatMessaging = useMessaging();
+
+    console.log(chats);
 
     const searchSubmit = (searchValue: string) => searchValue;
 
@@ -111,8 +113,8 @@ function MessagesHomeScreen({navigation, route}: MessagesHomeScreenProps) {
     // Storage for all Chat Bars states controllers
     const chatsControl: Record<number | string, IchatBarStatesControl> = {};
 
-    const renderError = (chatObject: ChatContext, event: MessageEvent, message: ChatMessage) => {
-        if (message.senderId === 'server') {
+    const renderError = (chatObject: ChatContext, message: IncomingChatMessage | OutgoingChatMessage, event: MessageEvent) => {
+        if ((message as IncomingChatMessage).senderId === 'server') {
             if (message.status === 401) {
                 showMessage('Unauthorized: Try signing in again', 'caution');
             }
@@ -122,19 +124,14 @@ function MessagesHomeScreen({navigation, route}: MessagesHomeScreenProps) {
     useEffect(() => {
         chatMessaging.connect();
         chatMessaging.attachListenerToWebsocketReceiveEvent(renderError);
+        chatMessaging.attachListenerToWebsocketReceiveEvent(chatMessaging.padiPrimaryChatAppPlugin);
     }, []);
 
     const activeChatsElements = [];
-    for (let i = 0; i < 6; i++) {
-        const {isTyping, userOnlineState, recentMessage, newMessagesCount, updateIsTyping, updateUserOnlineState, updateRecentMessage, updateNewMessagesCount} = useChatBar();
-        chatsControl[i] = {
-            updateIsTyping,
-            updateUserOnlineState,
-            updateRecentMessage,
-            updateNewMessagesCount,
-        };
-
-        activeChatsElements.push(<ChatBar key={i} userId={i} userTypingState={i === 3 ? true : isTyping} userOnlineState={userOnlineState} recentChatMessage={recentMessage} newMessagesCount={newMessagesCount} />);
+    for (const recipientId in chats) {
+        if (chats.hasOwnProperty(recipientId)) {
+            activeChatsElements.push(<ChatBar key={recipientId} userId={parseInt(recipientId, 10)} />);
+        }
     }
 
     return (

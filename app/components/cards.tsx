@@ -1,16 +1,17 @@
-import React, {useLayoutEffect, useRef} from 'react';
+import React, {useLayoutEffect, useRef, useState} from 'react';
 import {View, StyleSheet, Dimensions, ScrollView, Pressable} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 
 import colors from '../config/colors';
 import * as metrics from '../utils/metrics';
-import {AntDesign, EvilIcons, Feather} from '@expo/vector-icons';
+import {AntDesign, Entypo, EvilIcons, Feather, FontAwesome, Ionicons} from '@expo/vector-icons';
 import icons from '../config/icons';
 import {Header3, Header4, Subtitle2} from './headers';
 import AppText from './text';
 import fonts from '../config/fonts';
 import {UserImage} from './images';
-import {MessagesStackList} from '../navigations/MessagesNavigator';
+import {type DirectMessageChatNavigationProp} from '../navigations/MessagesNavigator';
+import {TextInput} from 'react-native-gesture-handler';
 
 interface ServiceCardProps {
     iconName: 'linechart' | 'home' | 'tool';
@@ -145,16 +146,50 @@ export function RatingCard({userId}: IratingCardProps) {
 interface ImessageUserCardProps {
     userId: number;
 }
-export function MessageUserCardProps({userId}: ImessageUserCardProps) {
-    const chatNavigation = useNavigation<MessagesStackList>();
+export function MessageUserCardProps<NavigationProp extends DirectMessageChatNavigationProp>({userId}: ImessageUserCardProps) {
+    const chatNavigation = useNavigation<NavigationProp>();
     return (
         <View style={styles.messageUserCardContainer}>
-            <View style={styles.sendToMessageContainer}>
+            <Pressable
+                style={styles.sendToMessageContainer}
+                onPress={() => {
+                    chatNavigation.navigate('DirectMessageChatScreen', {recipientId: userId});
+                }}
+            >
                 <AppText style={{fontSize: fonts.medium}}>Message</AppText>
-            </View>
-            <Pressable style={styles.callButton} onPress={() => chatNavigation.}>
+            </Pressable>
+            <Pressable style={styles.callButton}>
                 <Feather name='phone' size={icons.xl6} color={colors.white} />
             </Pressable>
+        </View>
+    );
+}
+
+export interface SendChatMessageControlProps {
+    messageSend: (message: string) => void;
+}
+export function SendChatMessageControl({messageSend}: SendChatMessageControlProps) {
+    const [message, setMessage] = useState('');
+
+    const handleTextChange = (text: string) => {
+        setMessage(text);
+    };
+
+    return (
+        <View style={styles.sendChatMessageControlContainer}>
+            <View style={styles.sendChatMessageControlInputContainer}>
+                <TextInput multiline numberOfLines={5} style={styles.sendChatMessageControlInput} placeholder='Message' onChangeText={handleTextChange} />
+            </View>
+            <View style={{marginLeft: metrics.horizontalScale(8)}}>
+                <Pressable
+                    onPress={() => {
+                        messageSend(message);
+                    }}
+                    style={styles.sendChatMessageControlSendMessageButton}
+                >
+                    <Entypo style={{marginRight: 2}} name='paper-plane' color={colors.white} size={icons.xl} />
+                </Pressable>
+            </View>
         </View>
     );
 }
@@ -260,5 +295,32 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         height: '100%',
         borderRadius: 10,
+    },
+
+    // Chat messages control
+    sendChatMessageControlContainer: {
+        flexDirection: 'row',
+        paddingVertical: metrics.verticalScale(16),
+        paddingHorizontal: metrics.horizontalScale(16),
+        borderTopColor: '#F5F5F5',
+        borderTopWidth: 2,
+        alignItems: 'center',
+        backgroundColor: colors.white,
+    },
+    sendChatMessageControlInputContainer: {
+        flex: 0.9,
+        borderWidth: 0.5,
+        borderColor: '#CECFCF',
+        padding: metrics.moderateScale(12),
+        borderRadius: 6,
+    },
+    sendChatMessageControlInput: {
+        fontSize: fonts.normal,
+        maxHeight: metrics.horizontalScale(100),
+    },
+    sendChatMessageControlSendMessageButton: {
+        backgroundColor: colors.primaryColor800B,
+        padding: metrics.moderateScale(8),
+        borderRadius: 50,
     },
 });

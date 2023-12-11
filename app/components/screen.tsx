@@ -1,14 +1,15 @@
 import React from 'react';
-import {SafeAreaView, View, StyleSheet} from 'react-native';
+import {SafeAreaView, View, StyleSheet, type ViewStyle} from 'react-native';
 import Constants from 'expo-constants';
 
 type ScreenProps = {
     children: React.ReactNode;
+    innerContainerStyle?: ViewStyle;
 };
-function Screen({children}: ScreenProps) {
+function Screen({children, innerContainerStyle}: ScreenProps) {
     return (
         <SafeAreaView style={styles.container}>
-            <View style={styles.innerContainer}>{children}</View>
+            <View style={[styles.innerContainer, innerContainerStyle]}>{children}</View>
         </SafeAreaView>
     );
 }
