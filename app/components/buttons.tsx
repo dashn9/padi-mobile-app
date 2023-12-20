@@ -14,6 +14,7 @@ interface ButtonProps {
     text: string;
     buttonStyle?: ViewStyle;
     textStyle?: TextStyle;
+    disabled?: boolean;
 }
 interface FormButtonProps extends Omit<ButtonProps, 'icon' | 'buttonStyle' | 'textStyle'> {
     text: string;
@@ -55,9 +56,9 @@ export function FormButton2({text, onPress, iconName, isLoading = false}: FormBu
     );
 }
 
-export function Button({text, onPress, icon, isLoading, buttonStyle, textStyle}: ButtonProps) {
+export function Button({text, onPress, icon, isLoading, buttonStyle, textStyle, disabled}: ButtonProps) {
     return (
-        <Pressable style={[styles.button, buttonStyle]} onPress={onPress}>
+        <Pressable style={[styles.button, buttonStyle]} onPress={onPress} disabled={disabled}>
             {icon}
             <Text style={[styles.buttonText, textStyle]}>{text}</Text>
             {isLoading ? <ActivityIndicator color='#fff' /> : null}

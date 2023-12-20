@@ -122,11 +122,11 @@ export const Message2: React.FC<MessageProps> = ({message, status, isVisible, on
         const newStatus = status ?? 'success';
         return (
             <Animated.View style={[styles.message2Container, {backgroundColor: color, borderColor: boldColor}, containerStyle]}>
-                <FontAwesome style={{marginLeft: metrics.horizontalScale(12)}} name={newStatus === 'success' ? 'check-circle' : newStatus === 'failure' ? 'times-circle' : 'exclamation-circle'} color={boldColor} size={icons.m + 2} />
+                <FontAwesome style={{marginLeft: metrics.horizontalScale(8)}} name={newStatus === 'success' ? 'check-circle' : newStatus === 'failure' ? 'times-circle' : 'exclamation-circle'} color={boldColor} size={icons.m + 2} />
                 <Text style={[styles.text, {color: boldColor}]} numberOfLines={1}>
                     {message}
                 </Text>
-                <Feather name='x' size={icons.s} color={boldColor} style={{marginLeft: 'auto', marginRight: metrics.horizontalScale(16)}} onPress={onHide} />
+                <Feather name='x' size={icons.s} color={boldColor} style={{marginLeft: 'auto', marginRight: metrics.horizontalScale(6)}} onPress={onHide} />
             </Animated.View>
         );
     };
@@ -160,9 +160,8 @@ const styles = StyleSheet.create({
     },
     text: {
         color: messagesColorBold.success,
-        textAlign: 'center',
-        fontSize: metrics.moderateScale(16),
-        marginLeft: metrics.horizontalScale(8),
+        fontSize: metrics.moderateScale(14),
+        marginLeft: metrics.horizontalScale(6),
         maxWidth: '85%',
     },
 });

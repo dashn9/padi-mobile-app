@@ -26,6 +26,7 @@ interface FormInputProps {
 }
 
 interface FormTextAreaProps extends FormInputProps {
+    outText?: string;
     maxLength?: number;
 }
 
@@ -52,6 +53,7 @@ const parseError = (error: string | string[]) => {
 };
 
 export function FormTextArea({
+    outText,
     inputLabel,
     placeholder,
     onChangeText,
@@ -62,6 +64,12 @@ export function FormTextArea({
     maxLength = 500, // Set a default max length (adjust as needed)
 }: FormTextAreaProps) {
     const [text, setText] = useState('');
+
+    useEffect(() => {
+        if (outText) {
+            setText(outText);
+        }
+    }, [outText]);
 
     const handleTextChange = (newText: string) => {
         if (newText.length <= maxLength) {

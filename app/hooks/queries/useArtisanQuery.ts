@@ -20,6 +20,10 @@ export interface ArtisanLight {
     firstName: string;
     lastName: string;
     stateFull: string;
+
+    // These fields are updated via fetching aggregates through ratings
+    ratingAverage?: number;
+    ratingsCount?: number;
 }
 
 export interface ArtisanProfile extends ArtisanLight {

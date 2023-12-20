@@ -1,17 +1,22 @@
-import React, {useLayoutEffect, useRef, useState} from 'react';
-import {View, StyleSheet, Dimensions, ScrollView, Pressable} from 'react-native';
+import React, {useEffect, useLayoutEffect, useRef, useState} from 'react';
+import {View, StyleSheet, Dimensions, ScrollView, Pressable, Modal, ActivityIndicator} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
+import {TextInput} from 'react-native-gesture-handler';
+import {AntDesign, Entypo, EvilIcons, Feather, MaterialCommunityIcons} from '@expo/vector-icons';
+import StarRating from 'react-native-star-rating-widget';
 
 import colors from '../config/colors';
 import * as metrics from '../utils/metrics';
-import {AntDesign, Entypo, EvilIcons, Feather, FontAwesome, Ionicons} from '@expo/vector-icons';
 import icons from '../config/icons';
 import {Header3, Header4, Subtitle2} from './headers';
 import AppText from './text';
 import fonts from '../config/fonts';
 import {UserImage} from './images';
 import {type DirectMessageChatNavigationProp} from '../navigations/MessagesNavigator';
-import {TextInput} from 'react-native-gesture-handler';
+import {FormTextArea} from './inputs';
+import {Button} from './buttons';
+import {type RatingCreate} from '../hooks/mutations/useRatingMutation';
+import {useFetchMyRatingQuery} from '../hooks/queries/useRatingQuery';
 
 interface ServiceCardProps {
     iconName: 'linechart' | 'home' | 'tool';
@@ -120,22 +125,27 @@ export function ArtisanProfileListCard({firstName, lastName, state, rating, revi
 }
 
 interface IratingCardProps {
-    userId: number;
+    firstName: string;
+    lastName: string;
+    comment: string;
+    starRating: number;
 }
-export function RatingCard({userId}: IratingCardProps) {
+export function RatingCard({firstName, lastName, comment, starRating}: IratingCardProps) {
     return (
         <View style={styles.profileListCardContainer}>
             <View>
                 <View style={styles.artisanProfilListCardInnerContainer}>
-                    <AppText style={styles.artisansProfileListCardNameTextStyle}>James Guidetti</AppText>
+                    <AppText style={styles.artisansProfileListCardNameTextStyle}>
+                        {firstName} {lastName}
+                    </AppText>
                     <View style={styles.artisanProfileListCardRatingContainer}>
                         <AntDesign name='star' color={colors.ratingColor} size={metrics.moderateScale(icons.xs)} />
-                        <AppText> {4.5}</AppText>
+                        <AppText> {starRating}</AppText>
                     </View>
                 </View>
                 <View style={[styles.artisanProfilListCardInnerContainer, {marginTop: metrics.verticalScale(12)}]}>
                     <View style={styles.artisanProfileListCardLocationContainer}>
-                        <AppText style={{color: '#848484', fontSize: metrics.moderateScale(15)}}>This is my description</AppText>
+                        <AppText style={{color: '#848484', fontSize: metrics.moderateScale(15)}}>{comment}</AppText>
                     </View>
                 </View>
             </View>
@@ -191,6 +201,72 @@ export function SendChatMessageControl({messageSend}: SendChatMessageControlProp
                 </Pressable>
             </View>
         </View>
+    );
+}
+
+export type Rate = Pick<RatingCreate, 'ratingComment' | 'ratingStarsPoint'>;
+interface PostReviewProps {
+    targetName?: string;
+    targetType: string;
+    targetId: number;
+    isPosting?: boolean;
+    visible: boolean;
+    setVisibility: (visible: boolean) => void;
+    onRatingPost?: (rating: Rate) => void;
+}
+
+export function PostReview({targetName = 'this person', visible, setVisibility, onRatingPost, isPosting, targetType, targetId}: PostReviewProps) {
+    const [starRating, setStarRating] = useState(1);
+    const [comment, setComment] = useState('');
+
+    const myRating = useFetchMyRatingQuery(targetType, targetId);
+
+    useEffect(() => {
+        setStarRating(myRating.data?.ratingStarsPoint ?? 1);
+        setComment(myRating.data?.ratingComment ?? '');
+    }, [myRating.data]);
+
+    const updateStarRating = (rating: number) => {
+        if (rating >= 1) {
+            setStarRating(rating);
+        }
+    };
+
+    const uploadRating = () => {
+        if (onRatingPost) {
+            onRatingPost({ratingComment: comment, ratingStarsPoint: starRating});
+        }
+    };
+
+    return (
+        <Modal animationType='fade' transparent={true} visible={visible}>
+            <View style={styles.centeredView}>
+                <View style={styles.postReviewContainer}>
+                    <MaterialCommunityIcons
+                        name='cancel'
+                        size={icons.l}
+                        style={{marginLeft: 'auto'}}
+                        onPress={() => {
+                            setVisibility(false);
+                        }}
+                    />
+                    <Header3 style={{marginTop: 0}}>Post Review</Header3>
+                    <FormTextArea
+                        outText={comment}
+                        placeholder={'Review ' + targetName}
+                        maxLength={300}
+                        onChangeText={text => {
+                            if (typeof text === 'string') {
+                                setComment(text);
+                            }
+                        }}
+                    />
+                    <StarRating style={{alignSelf: 'center'}} starSize={40} rating={starRating} onChange={updateStarRating} />
+                    {isPosting ? <ActivityIndicator style={{marginLeft: 'auto', marginTop: metrics.verticalScale(16)}} color={colors.primaryCOlor900B} /> : ''}
+                    <Button disabled={isPosting} buttonStyle={{marginLeft: 'auto', marginTop: metrics.verticalScale(16)}} text='Post Review' onPress={uploadRating} />
+                </View>
+            </View>
+        </Modal>
     );
 }
 
@@ -322,5 +398,25 @@ const styles = StyleSheet.create({
         backgroundColor: colors.primaryColor800B,
         padding: metrics.moderateScale(8),
         borderRadius: 50,
+    },
+
+    // Post review
+    centeredView: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    postReviewContainer: {
+        margin: metrics.moderateScale(20),
+        backgroundColor: 'white',
+        borderRadius: 8,
+        padding: metrics.moderateScale(24),
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
     },
 });

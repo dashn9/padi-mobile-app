@@ -8,17 +8,20 @@ export interface Paginated<T> {
     previous: string | undefined;
     results: T[];
 }
-
+// I came to the damning realization Tanstack has a useInfinite query which is equivalent to this functionality below.
+// In the future, find a way to use and replace this
 // Best used when dealing with a paginated endpoint
 export function usePageNumberPagination<T>(
-    query: (page: number, filters?: any) => UseQueryResult<Paginated<T>>,
+    query: (page: number, filters?: any, urlAffixes?: any) => UseQueryResult<Paginated<T>>,
     appendResults = false,
     filters?: Record<string, any>,
+    urlAffixes?: Record<string, any>,
 ) {
     const [results, setResults] = useState<Set<T>>(new Set());
+    const [resultsCount, setResultsCount] = useState(0);
     const [page, setPage] = useState(1);
 
-    const paginated = query(page, filters);
+    const paginated = query(page, filters, urlAffixes);
     let pageSize = 10;
 
     let prevPage = 0;
@@ -48,6 +51,7 @@ export function usePageNumberPagination<T>(
         prevPage = page;
 
         setResults(new Set(newResults));
+        setResultsCount(paginated?.data?.count ?? 0);
     }, [paginated?.data?.results]);
 
     const goForward = () => {
@@ -62,5 +66,5 @@ export function usePageNumberPagination<T>(
         }
     };
 
-    return {results, isPaginationLoading: paginated?.isFetching, goBack, goForward};
+    return {results, resultsCount, isPaginationLoading: paginated?.isFetching, goBack, goForward};
 }

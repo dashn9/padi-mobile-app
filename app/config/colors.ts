@@ -28,5 +28,6 @@ const colors: Record<string, string> = {
     cautionBrownBold: '#D66F0F',
     failureRedBold: '#CA1B1B',
     failureRed: '#FDF2E7',
+    transparentBackground: 'rgba(0, 0, 0, 0.5)',
 };
 export default colors;
