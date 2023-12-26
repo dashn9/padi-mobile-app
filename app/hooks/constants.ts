@@ -10,3 +10,9 @@ export interface UserDetails extends UserDetailsLight {
     state: string;
     birthDate: string;
 }
+
+export interface MutationProps<T> {
+    mutationLoadingCallbackFn: (loadingState: boolean) => void;
+    mutationSuccessCallbackFn: (data: T | undefined) => void;
+    mutationErrorCallbackFn: (error: Error) => void;
+}

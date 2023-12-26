@@ -8,15 +8,18 @@ import {FormButton} from '../../../components/buttons';
 import {Message2, useMessage} from '../../../components/messages';
 import Screen from '../../../components/screen';
 import {Header4} from '../../../components/headers';
-import {type ChangeBirthDateScreenProps, type ChangeStateScreenProps} from '../../../navigations/AccountNavigator';
+import {type ChangeArtisanServicesScreenProps, type ChangeArtisanBioScreenProps, type ChangeBirthDateScreenProps, type ChangeStateScreenProps} from '../../../navigations/AccountNavigator';
 import {Back} from '../../../navigations/controls';
 import * as metrics from '../../../utils/metrics';
 import {states} from '../../../config/lists';
 import {useChangeUserPropertyMutation} from '../../../hooks/mutations/useUserMutation';
 import AppText from '../../../components/text';
 import colors from '../../../config/colors';
-import {DatePickerCustom, SearchableDropDown} from '../../../components/inputs';
+import {DatePickerCustom, FormTextArea, SearchableDropDown} from '../../../components/inputs';
 import {removeNoOfYearsFromDate} from '../../../utils/datetime';
+import {useComposeArtisanMutation} from '../../../hooks/mutations/useArtisanMutation';
+import {useFetchMyArtisanProfileQuery, useFetchServicesQuery} from '../../../hooks/queries/useArtisanQuery';
+import {parseSelectableDataFromObject} from '../../../utils/object';
 
 export interface ChangeAccountProperty {
     id: number;
@@ -32,11 +35,18 @@ const accountBirthDateValidationSchema = Yup.object().shape({
         .matches(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format (yyyy-mm-dd)'),
 });
 
+const artisanBioValidationSchema = Yup.object().shape({
+    bio: Yup.string().required().label('Bio'),
+});
+
+const artisanServicesValidationSchema = Yup.object().shape({
+    services: Yup.string().required().label('Service'),
+});
+
 export function ChangeAccountStateScreen({route, navigation}: ChangeStateScreenProps) {
     const {isVisible, message, messageStatus, showMessage, hideMessage} = useMessage();
     const [stateValue, setStateValue] = useState('');
     const [isAccountStateUpdating, setIsAccountStateUpdating] = useState(false);
-
     const userPropertyMutator = useChangeUserPropertyMutation(
         setIsAccountStateUpdating,
         () => {
@@ -140,6 +150,124 @@ export function ChangeAccountBirthDateScreen({route, navigation}: ChangeBirthDat
                                 </View>
                                 <View style={styles.changeAccountPropertyFormSubmitContainer}>
                                     <FormButton text='Update Birth Date' onPress={handleSubmit} isLoading={isAccountStateUpdating} />
+                                </View>
+                            </>
+                        );
+                    }}
+                </Formik>
+            </View>
+        </Screen>
+    );
+}
+
+export function ChangeArtisanBioScreen({route, navigation}: ChangeArtisanBioScreenProps) {
+    const {isVisible, message, messageStatus, showMessage, hideMessage} = useMessage();
+    const [isAccountStateUpdating, setIsAccountStateUpdating] = useState(false);
+    const myArtisan = useFetchMyArtisanProfileQuery();
+    const artisanPropertyMutator = useComposeArtisanMutation({
+        mutationLoadingCallbackFn: setIsAccountStateUpdating,
+        mutationSuccessCallbackFn() {
+            showMessage('Bio updated successfully', 'success');
+            void myArtisan.refetch();
+            setTimeout(() => {
+                navigation.goBack();
+            }, 2000);
+        },
+        mutationErrorCallbackFn(error) {
+            showMessage('Unable to update your bio', 'failure');
+        },
+    });
+
+    return (
+        <Screen>
+            <View style={styles.changeAccountPropertyScreenContainer}>
+                <Message2 message={message} status={messageStatus} isVisible={isVisible} onHide={hideMessage} />
+                <Back style={{position: 'relative', top: 0, marginTop: metrics.verticalScale(24)}} />
+                <Header4>Modify your bio</Header4>
+                <Formik
+                    initialValues={{
+                        bio: route.params.currentBio,
+                    }}
+                    onSubmit={async values => {
+                        artisanPropertyMutator.mutate({bio: values.bio});
+                    }}
+                    validationSchema={artisanBioValidationSchema}
+                >
+                    {({handleChange, handleSubmit, errors, touched}) => (
+                        <>
+                            <View style={styles.changeAccountPropertyFormContainer}>
+                                <FormTextArea
+                                    placeholder='Enter your new bio'
+                                    outText={route.params.currentBio}
+                                    onChangeText={text => {
+                                        handleChange('bio')(text);
+                                    }}
+                                />
+                                {touched?.bio ? <AppText style={{color: colors.failureRedBold}}>{errors.bio}</AppText> : undefined}
+                            </View>
+                            <View style={styles.changeAccountPropertyFormSubmitContainer}>
+                                <FormButton text='Update State' onPress={handleSubmit} isLoading={isAccountStateUpdating} />
+                            </View>
+                        </>
+                    )}
+                </Formik>
+            </View>
+        </Screen>
+    );
+}
+
+export function ChangeArtisanServicesScreen({route, navigation}: ChangeArtisanServicesScreenProps) {
+    const {isVisible, message, messageStatus, showMessage, hideMessage} = useMessage();
+    const [serviceValue, setServiceValue] = useState('');
+    const [isAccountStateUpdating, setIsAccountStateUpdating] = useState(false);
+    const myArtisan = useFetchMyArtisanProfileQuery();
+    const artisanPropertyMutator = useComposeArtisanMutation({
+        mutationLoadingCallbackFn: setIsAccountStateUpdating,
+        mutationSuccessCallbackFn() {
+            showMessage('Service updated successfully', 'success');
+            void myArtisan.refetch();
+            setTimeout(() => {
+                navigation.goBack();
+            }, 2000);
+        },
+        mutationErrorCallbackFn(error) {
+            showMessage('Unable to update your service', 'failure');
+        },
+    });
+
+    const services = useFetchServicesQuery().data;
+
+    const updateServiceValue = (serviceValue: React.SetStateAction<string>) => {
+        setServiceValue(serviceValue);
+    };
+
+    return (
+        <Screen>
+            <View style={styles.changeAccountPropertyScreenContainer}>
+                <Message2 message={message} status={messageStatus} isVisible={isVisible} onHide={hideMessage} />
+                <Back style={{position: 'relative', top: 0, marginTop: metrics.verticalScale(24)}} />
+                <Header4>Enter your state</Header4>
+                <Formik
+                    initialValues={{
+                        services: '',
+                    }}
+                    onSubmit={async values => {
+                        artisanPropertyMutator.mutate({services: [values.services]});
+                    }}
+                    validationSchema={artisanServicesValidationSchema}
+                >
+                    {({handleChange, handleSubmit, errors, touched}) => {
+                        useEffect(() => {
+                            handleChange('services')(serviceValue);
+                        }, [serviceValue]);
+                        return (
+                            <>
+                                <View style={styles.changeAccountPropertyFormContainer}>
+                                    {services ? <SearchableDropDown items={parseSelectableDataFromObject(services, 'serviceName', 'serviceCode')} value={serviceValue} setValue={updateServiceValue} placeholder='Select Service' searchPlaceholder='Search Services' /> : null}
+                                    {touched?.services ? <AppText style={{color: colors.failureRedBold}}>{errors.services}</AppText> : undefined}
+                                </View>
+                                <View style={styles.changeAccountPropertyFormSubmitContainer}>
+                                    <FormButton text='Update State' onPress={handleSubmit} isLoading={isAccountStateUpdating} />
                                 </View>
                             </>
                         );

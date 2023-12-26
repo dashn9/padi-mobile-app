@@ -46,6 +46,7 @@ const queryKeys = {
     fetchServicesKey: ['services'],
     fetchArtisansKey: ['artisans'],
     fetchArtisanProfileKey: ['artisan'],
+    fetchMyArtisanProfileKey: ['my_artisan'],
     checkIfIsArtisanKey: ['is_artisan'],
 };
 
@@ -92,9 +93,19 @@ export const useFetchArtisanProfileQuery = (artisanId: number) => {
 
     const fetchArtisanProfile = async () => {
         const data = await sendRequest<undefined, ArtisanProfile>({urlId: 'fetch-artisan-profile', urlAffix: artisanId.toString() + '/'});
-        console.log(data);
         return data;
     };
 
     return useQuery({queryKey: [...queryKeys.fetchArtisanProfileKey, artisanId], queryFn: fetchArtisanProfile});
+};
+
+export const useFetchMyArtisanProfileQuery = () => {
+    const {sendRequest} = useNetwork();
+
+    const fetchMyArtisanProfile = async () => {
+        const data = await sendRequest<undefined, ArtisanProfile>({urlId: 'fetch-my-artisan-profile'});
+        return data;
+    };
+
+    return useQuery({queryKey: [...queryKeys.fetchMyArtisanProfileKey], queryFn: fetchMyArtisanProfile});
 };

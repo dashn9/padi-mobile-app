@@ -28,6 +28,22 @@ export const artisans: Record<string, IapiEndpoint> = {
         ...reformDataKeys,
     },
 
+    'fetch-my-artisan-profile': {
+        url: API_BASE_HOST + '/artisans/me/',
+        name: 'Fetch My Artisan Profile',
+        requireAuthToken: true,
+        method: 'GET',
+        ...reformDataKeys,
+    },
+
+    'compose-my-artisan-profile': {
+        url: API_BASE_HOST + '/artisans/me/',
+        name: 'Compose My Artisan Profile',
+        requireAuthToken: true,
+        method: 'PUT',
+        ...reformDataKeys,
+    },
+
     'check-if-artisan': {
         url: API_BASE_HOST + '/artisans/is_artisan/',
         name: 'Fetch Artisan Profile',

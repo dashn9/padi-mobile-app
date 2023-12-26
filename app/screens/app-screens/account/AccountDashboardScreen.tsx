@@ -11,7 +11,7 @@ import AppText from '../../../components/text';
 import {useAuthContext} from '../../../hooks/contexts/AuthContext';
 import {Header3, Header4} from '../../../components/headers';
 import {capitalizeFirstLetter} from '../../../utils/string';
-import {AntDesign, Entypo, FontAwesome5, MaterialCommunityIcons} from '@expo/vector-icons';
+import {AntDesign, Entypo, FontAwesome5, Ionicons, MaterialCommunityIcons} from '@expo/vector-icons';
 import colors from '../../../config/colors';
 import {useCheckIfIsArtisanQuery} from '../../../hooks/queries/useArtisanQuery';
 import {Button} from '../../../components/buttons';
@@ -82,7 +82,17 @@ export function AccountDashboardScreen({route, navigation}: AccountDashboardScre
                     <View>
                         <Header3 style={{marginBottom: metrics.verticalScale(42), textAlign: 'center'}}>Profiles</Header3>
                         {isArtisan.data ? (
-                            <View></View>
+                            <View>
+                                <AccountDetailItem
+                                    onClick={() => {
+                                        console.log('hittin');
+                                        navigation.navigate('ArtisanProfileDashboard');
+                                    }}
+                                    label='View your Artisan Profile'
+                                    value=' '
+                                    icon={<Ionicons name='construct' size={icons.m} />}
+                                />
+                            </View>
                         ) : (
                             <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
                                 <Header4 style={{flexDirection: 'row', marginTop: 0, color: colors.successGreenBold}}>Get paid for your skills!</Header4>
