@@ -4,11 +4,13 @@ import snakify from 'snakify-ts';
 
 import useAuth from './useAuth';
 import {WEBSOCKET_BASE_URL} from '../apis/constants';
-import {type IncomingChatMessage, useChatMessagesDataContext, useCreateChatMessagingObject, type ChatContext, isChatMessage, type OutgoingChatMessage} from './contexts/ChatMessagesDataContext';
+import {type IncomingChatMessage, useChatMessagesDataContext, useCreateChatMessagingObject, type ChatContext, isChatMessage, type OutgoingChatMessage, chatsMetaReducer} from './contexts/ChatMessagesDataContext';
 import {primaryChatKey} from '../config/env';
 import {useAuthContext} from './contexts/AuthContext';
 import {formatDateTimeStringWithTimezone} from '../utils/datetime';
 import {WebSocketNotExistOrOpenError} from '../errors/websocketErrors';
+
+type Message = OutgoingChatMessage | IncomingChatMessage;
 
 export function useMessaging(connectOnCall = true, messagesKey: undefined | string | number = undefined) {
     const {fetchAccessToken} = useAuth();
@@ -38,16 +40,23 @@ export function useMessaging(connectOnCall = true, messagesKey: undefined | stri
         const {websocketConnection} = chatMessages;
         if (websocketConnection) {
             websocketConnection.onopen = (ev: Event) => {
-                console.log(ev);
+                console.log('websocket opened', ev);
+                Object.values(chatMessages.websocketConnectionOpenEventCallbacks).forEach(callback => {
+                    callback(chatMessages, ev);
+                });
             };
 
             websocketConnection.onmessage = (ev: MessageEvent<string>) => {
-                const message = camelize(JSON.parse(ev.data).data);
-                if (isChatMessage(message)) {
-                    Object.values(chatMessages.websocketConnectionReceiveEventCallbacks).forEach(callback => {
-                        callback(chatMessages, message, ev);
-                    });
+                let message = JSON.parse(ev.data).data as IncomingChatMessage | Message[];
+                if (Array.isArray(message)) {
+                    message = message.map(message => camelize(message));
+                } else {
+                    message = camelize(message);
                 }
+
+                Object.values(chatMessages.websocketConnectionReceiveEventCallbacks).forEach(callback => {
+                    callback(chatMessages, message, ev);
+                });
             };
 
             websocketConnection.onclose = (ev: CloseEvent) => {
@@ -95,6 +104,44 @@ export function useMessaging(connectOnCall = true, messagesKey: undefined | stri
         }
     };
 
+    const sendRequestToRetrieveAllSavedIncomingMessagesFromTimestamp = (chatMessages: ChatContext) => {
+        try {
+            if (chatMessages.websocketConnection) {
+                const lastSenderDtime = chatMessages.chatsMeta[primaryChatKey]?.lastIncomingMessageDtime;
+
+                const fetchMessagesFromTimestampRequestPayload = {
+                    recipientId: 'server',
+                    intent: 'fetch-all-my-incoming-messages-from-dtime',
+                    intentMessage: lastSenderDtime,
+                    senderTimestamp: formatDateTimeStringWithTimezone(),
+                };
+
+                const fetchAllMessagesRequestPayload = {
+                    recipientId: 'server',
+                    intent: 'fetch-all-my-messages',
+                    senderTimestamp: formatDateTimeStringWithTimezone(),
+                };
+
+                if (!lastSenderDtime) {
+                    chatMessages.chatsDispatcher({
+                        actionType: 'overwrite-chats',
+                        chatPayload: {},
+                        payload: undefined,
+                    });
+                }
+
+                chatMessages.websocketConnection.send(JSON.stringify(snakify(lastSenderDtime ? fetchMessagesFromTimestampRequestPayload : fetchAllMessagesRequestPayload)));
+            }
+        } catch (error) {
+            console.log(error);
+            throw new WebSocketNotExistOrOpenError();
+        }
+    };
+
+    const attachListenerToWebsocketOpenEvent = (callback: (chatObject: ChatContext, ev: Event) => void, key = 0) => {
+        chatMessages.setWebsocketConnectionOpenEventCallbacks({...chatMessages.websocketConnectionOpenEventCallbacks, [key]: callback});
+    };
+
     const attachListenerToWebsocketReceiveEvent = (callback: (chatObject: ChatContext, message: IncomingChatMessage, ev: MessageEvent) => void, key = 0) => {
         chatMessages.setWebsocketConnectionReceiveEventCallbacks({...chatMessages.websocketConnectionReceiveEventCallbacks, [key]: callback});
     };
@@ -103,17 +150,28 @@ export function useMessaging(connectOnCall = true, messagesKey: undefined | stri
         chatMessages.setWebsocketConnectionCloseEventCallbacks({...chatMessages.websocketConnectionCloseEventCallbacks, [key]: callback});
     };
 
-    const padiPrimaryChatAppPlugin = (chatObject: ChatContext, message: IncomingChatMessage | OutgoingChatMessage, ev?: MessageEvent) => {
-        // Console.log(message);
-        if (message.status === 200 && message.messageType === 'DM') {
-            if ((message as OutgoingChatMessage)?.recipientId !== 'server' && (message as IncomingChatMessage)?.senderId !== 'server') {
-                chatObject.chatsDispatcher({actionType: 'add-chat', payload: message});
-                if ('senderId' in message) {
-                    chatObject.chatsMetaDispatcher({actionType: 'increment-unread-messages-count', roomId: message.senderId});
+    const padiPrimaryChatAppPlugin = (chatObject: ChatContext, message: Message | Message[], ev?: MessageEvent) => {
+        function processMessage(message: Message) {
+            if (message.status === 200 && message.messageType === 'DM') {
+                if ((message as OutgoingChatMessage)?.recipientId !== 'server' && (message as IncomingChatMessage)?.senderId !== 'server') {
+                    chatObject.chatsDispatcher({actionType: 'add-chat', payload: message});
+                    if ('senderId' in message) {
+                        chatObject.chatsMetaDispatcher({actionType: 'increment-unread-messages-count', roomId: message.senderId});
+                        chatObject.chatsMetaDispatcher({actionType: 'update-last-incoming-message-dtime', dTimeString: message.senderTimestamp});
+                    }
                 }
             }
         }
+
+        if (Array.isArray(message)) {
+            // I'm to lazy to do it right now, but in the future, find a way to process all messages in one dispatch call
+            message.forEach(message => {
+                processMessage(message);
+            });
+        } else if (message) {
+            processMessage(message);
+        }
     };
 
-    return {connect, sendMessageToRecipient, attachListenerToWebsocketReceiveEvent, attachListenerToWebsocketCloseEvent, padiPrimaryChatAppPlugin};
+    return {connect, sendRequestToRetrieveAllSavedIncomingMessagesFromTimestamp, sendMessageToRecipient, attachListenerToWebsocketOpenEvent, attachListenerToWebsocketReceiveEvent, attachListenerToWebsocketCloseEvent, padiPrimaryChatAppPlugin};
 }

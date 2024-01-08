@@ -76,8 +76,11 @@ const useAuth = () => {
             // Console.log(await SecureStore.getItemAsync('userAuthDetails'));
             if (checkIfIsUser(user)) {
                 setUser({...user});
-                void userDetails.refetch();
-                setUser({...user, ...userDetails.data});
+                userDetails.refetch().then(data => {
+                    setUser({...user, ...userDetails.data});
+                }).catch(error => {
+                    console.log('Error fetching my user details', error);
+                });
             }
         } catch (e) {
             console.log(e);
@@ -140,6 +143,9 @@ const useAuth = () => {
                         // Console.log('token', tokenData);
                     }).catch(error => {
                         const objError = error as Record<string, unknown>;
+                        if ((objError?.response as Record<string, unknown>)?.status === 401) {
+                            void resetAuthentication();
+                        }
 
                         if (typeof objError?.response === 'undefined') {
                             // Render a page that shows the user needs to be connected to internet

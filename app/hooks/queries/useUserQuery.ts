@@ -15,7 +15,7 @@ export const useFetchMyUserDetailsQuery = () => {
         return data;
     };
 
-    return useQuery({queryKey: queryKeys.fetchMyUserDetails, queryFn: fetchMyUserDetails, enabled: false});
+    return useQuery({queryKey: queryKeys.fetchMyUserDetails, queryFn: fetchMyUserDetails, enabled: true});
 };
 
 export const useFetchUserDetailsQuery = (userId: number) => {

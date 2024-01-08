@@ -87,7 +87,7 @@ const SenderMessage = ({message}: {message: OutgoingChatMessage}) => {
                 <Feather name='chevrons-left' size={icons.m} color='#0B1721' style={{marginBottom: metrics.verticalScale(6)}} />
             </View>
             <View style={{marginTop: metrics.verticalScale(4)}}>
-                <AppText style={{fontSize: fonts.small, textAlign: 'left'}}>{formatAmPm(new Date(message.senderTimestamp.slice(0, -3)))}</AppText>
+                <AppText style={{fontSize: fonts.small, textAlign: 'left'}}>{formatAmPm(new Date(message.senderTimestamp), true)}</AppText>
             </View>
         </View>
     );

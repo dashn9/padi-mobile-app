@@ -1,6 +1,6 @@
 import React, {useEffect, useReducer, useState} from 'react';
 import {primaryChatKey} from '../../config/env';
-import * as SecureStore from 'expo-secure-store';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {isObjectEmpty} from '../../utils/object';
 
 // SM Self Message
@@ -28,6 +28,7 @@ export interface OutgoingChatMessage extends ChatMessage {
 
 interface ChatMeta {
     unreadMessagesCount: number;
+    lastIncomingMessageDtime: string;
 }
 
 type ChatsMeta = Record<string, ChatMeta>;
@@ -39,10 +40,11 @@ interface ChatActions {
 }
 
 interface ChatMetaActions {
-    actionType: 'increment-unread-messages-count' | 'reset-unread-messages-count' | 'overwrite-chats-meta';
+    actionType: 'increment-unread-messages-count' | 'reset-unread-messages-count' | 'overwrite-chats-meta' | 'update-last-incoming-message-dtime';
     chatMetaPayload?: ChatsMeta;
     // Technically recipient id'
-    roomId: number | string;
+    roomId?: number | string;
+    dTimeString?: string;
 }
 
 export function isChatMessage(obj: any): obj is IncomingChatMessage {
@@ -57,8 +59,10 @@ export type Chats = Record<number | string, Array<IncomingChatMessage | Outgoing
 export interface ChatContext {
     websocketConnection: WebSocket | undefined;
     setWebsocketConnection: React.Dispatch<React.SetStateAction<WebSocket | undefined>>;
-    websocketConnectionReceiveEventCallbacks: Record<string, (chatObject: ChatContext, message: IncomingChatMessage, messageEv: MessageEvent) => void>;
-    setWebsocketConnectionReceiveEventCallbacks: React.Dispatch<React.SetStateAction<Record<string, (chatObject: ChatContext, message: IncomingChatMessage, messageEv: MessageEvent) => void>>>;
+    websocketConnectionOpenEventCallbacks: Record<string, (chatObject: ChatContext, messageEv: Event) => void>;
+    setWebsocketConnectionOpenEventCallbacks: React.Dispatch<React.SetStateAction<Record<string, (chatObject: ChatContext, messageEv: Event) => void>>>;
+    websocketConnectionReceiveEventCallbacks: Record<string, (chatObject: ChatContext, message: IncomingChatMessage | Array<IncomingChatMessage | OutgoingChatMessage>, messageEv: MessageEvent) => void>;
+    setWebsocketConnectionReceiveEventCallbacks: React.Dispatch<React.SetStateAction<Record<string, (chatObject: ChatContext, message: IncomingChatMessage | Array<IncomingChatMessage | OutgoingChatMessage>, messageEv: MessageEvent) => void>>>;
     websocketConnectionCloseEventCallbacks: Record<string, (chatObject: ChatContext, closeEv: CloseEvent) => void>;
     setWebsocketConnectionCloseEventCallbacks: React.Dispatch<React.SetStateAction<Record<string, (chatObject: ChatContext, closeEv: CloseEvent) => void>>>;
     chats: Chats;
@@ -88,7 +92,7 @@ export const useChatMessagesDataContext = () => {
 };
 
 export const loadChatsFromStorage = (key: string | number, setChats: (chats: Chats) => void) => {
-    SecureStore.getItemAsync('websocket-messaging-chats' + key)
+    AsyncStorage.getItem('websocket-messaging-chats' + key)
         .then(stringifiedChats => {
             const chats = JSON.parse(stringifiedChats ?? '{}') as Chats;
             setChats(chats);
@@ -101,12 +105,12 @@ export const loadChatsFromStorage = (key: string | number, setChats: (chats: Cha
 
 export const saveChatsToStorage = (chats: Chats, key: string | number) => {
     // I don't really care about the response for now, so i'm setting void;
-    void SecureStore.setItemAsync('websocket-messaging-chats' + key, JSON.stringify(chats));
+    void AsyncStorage.setItem('websocket-messaging-chats' + key, JSON.stringify(chats));
     return true;
 };
 
 export const loadChatsMetaFromStorage = (key: string | number, setChatsMeta: (chats: ChatsMeta) => void) => {
-    SecureStore.getItemAsync('websocket-messaging-chats-meta' + key)
+    AsyncStorage.getItem('websocket-messaging-chats-meta' + key)
         .then(stringifiedChats => {
             const chats = JSON.parse(stringifiedChats ?? '{}') as ChatsMeta;
             setChatsMeta(chats);
@@ -119,7 +123,7 @@ export const loadChatsMetaFromStorage = (key: string | number, setChatsMeta: (ch
 
 export const saveChatsMetaToStorage = (chats: ChatsMeta, key: string | number) => {
     // I don't really care about the response for now, so i'm setting void;
-    void SecureStore.setItemAsync('websocket-messaging-chats-meta' + key, JSON.stringify(chats));
+    void AsyncStorage.setItem('websocket-messaging-chats-meta' + key, JSON.stringify(chats));
     return true;
 };
 
@@ -144,11 +148,19 @@ export const chatsMetaReducer = (state: ChatsMeta, action: ChatMetaActions) => {
     let chatMeta;
     switch (action.actionType) {
         case 'increment-unread-messages-count':
+            if (!action.roomId) {
+                return state;
+            }
+
             chatMeta = {...state[action.roomId]};
             chatMeta.unreadMessagesCount ??= 0;
             chatMeta.unreadMessagesCount += 1;
             return {...state, [action.roomId]: chatMeta};
         case 'reset-unread-messages-count':
+            if (!action.roomId || !state?.[action.roomId]) {
+                return state;
+            }
+
             chatMeta = {...state[action.roomId]};
             chatMeta.unreadMessagesCount = 0;
             return {...state, [action.roomId]: chatMeta};
@@ -158,7 +170,14 @@ export const chatsMetaReducer = (state: ChatsMeta, action: ChatMetaActions) => {
             }
 
             return state;
+        case 'update-last-incoming-message-dtime':
+            if (action.dTimeString) {
+                chatMeta = {...state[primaryChatKey]};
+                chatMeta.lastIncomingMessageDtime = action.dTimeString;
+                return {...state, [primaryChatKey]: chatMeta};
+            }
 
+            return state;
         default:
             return state;
     }
@@ -210,7 +229,6 @@ export const useCreateChatMessagingObject = (key = primaryChatKey): ChatContext 
 
     const updateLoadedChatsMeta = (loadedChatsMeta: ChatsMeta) => {
         chatsMetaDispatcher({
-            roomId: -1,
             actionType: 'overwrite-chats-meta',
             chatMetaPayload: loadedChatsMeta,
         });
@@ -234,11 +252,14 @@ export const useCreateChatMessagingObject = (key = primaryChatKey): ChatContext 
     }, [chatsMeta]);
 
     const [websocketConnection, setWebsocketConnection] = useState<WebSocket>();
-    const [websocketConnectionReceiveEventCallbacks, setWebsocketConnectionReceiveEventCallbacks] = useState<Record<string, (chatObject: ChatContext, message: IncomingChatMessage, messageEv: MessageEvent) => void>>({});
+    const [websocketConnectionOpenEventCallbacks, setWebsocketConnectionOpenEventCallbacks] = useState<Record<string, (chatObject: ChatContext, messageEv: Event) => void>>({});
+    const [websocketConnectionReceiveEventCallbacks, setWebsocketConnectionReceiveEventCallbacks] = useState<Record<string, (chatObject: ChatContext, message: IncomingChatMessage | Array<IncomingChatMessage | OutgoingChatMessage>, messageEv: MessageEvent) => void>>({});
     const [websocketConnectionCloseEventCallbacks, setWebsocketConnectionCloseEventCallbacks] = useState<Record<string, (chatObject: ChatContext, closeEv: CloseEvent) => void>>({});
     return {
         websocketConnection,
         setWebsocketConnection,
+        websocketConnectionOpenEventCallbacks,
+        setWebsocketConnectionOpenEventCallbacks,
         websocketConnectionReceiveEventCallbacks,
         setWebsocketConnectionReceiveEventCallbacks,
         websocketConnectionCloseEventCallbacks,

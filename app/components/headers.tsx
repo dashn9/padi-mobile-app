@@ -10,6 +10,7 @@ import {Back} from '../navigations/controls';
 interface HeaderProps {
     children: React.ReactNode;
     style?: ViewStyle | TextStyle;
+    backable?: boolean;
 }
 
 export function Header1({children, style}: HeaderProps) {
@@ -40,10 +41,10 @@ export function HomeHeader({children, style}: HeaderProps) {
     );
 }
 
-export function AppHeader({children, style}: HeaderProps) {
+export function AppHeader({children, style, backable = true}: HeaderProps) {
     return (
         <View style={[styles.headerContainer, style]}>
-            <Back style={{top: -4, left: 0}} design='back-icon-only-2' color='#555' />
+            {backable ? <Back style={{top: -4, left: 0}} design='back-icon-only-2' color='#555' /> : null}
             <Header3 style={{marginTop: 0}}>{children}</Header3>
         </View>
     );

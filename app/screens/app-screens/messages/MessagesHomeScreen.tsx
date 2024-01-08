@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
-import {View, StyleSheet, ScrollView} from 'react-native';
-import type {MessagesHomeScreenProps} from '../../../navigations/MessagesNavigator';
+import {View, StyleSheet, ScrollView, Pressable} from 'react-native';
+import type {MessagesHomeNavigationProp, MessagesHomeScreenProps} from '../../../navigations/MessagesNavigator';
 import Screen from '../../../components/screen';
 import AppText from '../../../components/text';
 import {SearchBox, useSearch} from '../../../components/inputs';
@@ -13,6 +13,7 @@ import {useMessaging} from '../../../hooks/useChatMessaging';
 import {useChatMessagesDataContext, type ChatContext, type IncomingChatMessage, type OutgoingChatMessage} from '../../../hooks/contexts/ChatMessagesDataContext';
 import {useMessage, Message2} from '../../../components/messages';
 import {primaryChatKey} from '../../../config/env';
+import {useFetchUserDetailsQuery} from '../../../hooks/queries/useUserQuery';
 
 // This is a custom hook, seperate all hooks into their own folder
 // This is obviously not the full coontents of the message
@@ -70,32 +71,42 @@ interface IchatBarStatesControl {
 }
 interface IchatBarProps {
     userId: number;
+    navigation: MessagesHomeNavigationProp;
 }
 
-function ChatBar({userId}: IchatBarProps) {
+function ChatBar({userId, navigation}: IchatBarProps) {
     const {chatsMeta, chats} = useChatMessagesDataContext()[primaryChatKey];
+    const userInfo = useFetchUserDetailsQuery(userId).data;
     const chatMeta = chatsMeta[userId];
     const lastChatMessage = chats[userId][chats[userId].length - 1];
     return (
-        <View style={styles.chatBarContainer}>
-            <View>{/** User image goes into this View */}</View>
-            <View style={styles.chatBarUserMessageInformation}>
-                <View style={styles.chatBarTitle}>
-                    <View>
-                        <Header4 style={{marginTop: 0}}>John Doe</Header4>
+        <Pressable
+            onPress={() => {
+                navigation.navigate('DirectMessageChatScreen', {recipientId: userId});
+            }}
+        >
+            <View style={styles.chatBarContainer}>
+                <View>{/** User image goes into this View */}</View>
+                <View style={styles.chatBarUserMessageInformation}>
+                    <View style={styles.chatBarTitle}>
+                        <View>
+                            <Header4 style={{marginTop: 0}}>
+                                {userInfo?.firstName} {userInfo?.lastName}
+                            </Header4>
+                        </View>
+                        <View>
+                            <TagBadge>Plumber</TagBadge>
+                        </View>
                     </View>
-                    <View>
-                        <TagBadge>Plumber</TagBadge>
-                    </View>
+                    <AppText style={[styles.chatBarRecentMessageText, {color: false ? colors.primaryColor600B : colors.subtitleColor}]}>{false ? 'Typing..........' : lastChatMessage.messageBody}</AppText>
                 </View>
-                <AppText style={[styles.chatBarRecentMessageText, {color: false ? colors.primaryColor600B : colors.subtitleColor}]}>{false ? 'Typing..........' : lastChatMessage.messageBody}</AppText>
+                <View style={styles.chatBarMessageInformation}>
+                    {chatMeta?.unreadMessagesCount > 0 ? <NewMessagesCountBadge count={chatMeta.unreadMessagesCount} /> : null}
+                    {/** TODO: Still have to update the time so it shows the date instead if the t */}
+                    <AppText style={{color: chatMeta?.unreadMessagesCount > 0 ? colors.primaryColor600B : 'black'}}>{formatAmPm(new Date(lastChatMessage.senderTimestamp), 'senderId' in lastChatMessage)}</AppText>
+                </View>
             </View>
-            <View style={styles.chatBarMessageInformation}>
-                {chatMeta?.unreadMessagesCount > 0 ? <NewMessagesCountBadge count={chatMeta.unreadMessagesCount} /> : null}
-                {/** TODO: Still have to update the time so it shows the date instead if the t */}
-                <AppText style={{color: chatMeta?.unreadMessagesCount > 0 ? colors.primaryColor600B : 'black'}}>{formatAmPm(new Date(lastChatMessage.senderTimestamp.slice(0, -3)), 'senderId' in lastChatMessage)}</AppText>
-            </View>
-        </View>
+        </Pressable>
     );
 }
 
@@ -103,9 +114,6 @@ function MessagesHomeScreen({navigation, route}: MessagesHomeScreenProps) {
     const {chats} = useChatMessagesDataContext()[primaryChatKey];
     const {isVisible, message, messageStatus, showMessage, hideMessage} = useMessage();
     const chatMessaging = useMessaging();
-
-    console.log(chats);
-
     const searchSubmit = (searchValue: string) => searchValue;
 
     const {searchValue, updateSearchValue, performSearch} = useSearch(searchSubmit);
@@ -122,15 +130,16 @@ function MessagesHomeScreen({navigation, route}: MessagesHomeScreenProps) {
     };
 
     useEffect(() => {
-        chatMessaging.connect();
-        chatMessaging.attachListenerToWebsocketReceiveEvent(renderError);
+        chatMessaging.attachListenerToWebsocketOpenEvent(chatMessaging.sendRequestToRetrieveAllSavedIncomingMessagesFromTimestamp);
+        chatMessaging.attachListenerToWebsocketReceiveEvent(renderError, 1);
         chatMessaging.attachListenerToWebsocketReceiveEvent(chatMessaging.padiPrimaryChatAppPlugin);
+        chatMessaging.connect();
     }, []);
 
     const activeChatsElements = [];
     for (const recipientId in chats) {
         if (chats.hasOwnProperty(recipientId)) {
-            activeChatsElements.push(<ChatBar key={recipientId} userId={parseInt(recipientId, 10)} />);
+            activeChatsElements.push(<ChatBar key={recipientId} userId={parseInt(recipientId, 10)} navigation={navigation} />);
         }
     }
 
@@ -139,7 +148,7 @@ function MessagesHomeScreen({navigation, route}: MessagesHomeScreenProps) {
             <Message2 message={message} status={messageStatus} isVisible={isVisible} onHide={hideMessage} />
             <View style={styles.messagesHomeScreenContainer}>
                 <View>
-                    <AppHeader>Inbox</AppHeader>
+                    <AppHeader backable={false}>Inbox</AppHeader>
                     <SearchBox onSearchSubmit={performSearch} />
                 </View>
                 <ScrollView>

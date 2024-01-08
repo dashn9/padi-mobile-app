@@ -67,7 +67,7 @@ const Message: React.FC<MessageProps> = ({message, status, isVisible, onHide}) =
 
     return (
         <Animated.View style={[styles.container, {backgroundColor: status === 'success' ? messagesColor.success : status === 'failure' ? messagesColor.failure : messagesColor.caution}, containerStyle]}>
-            <Text style={[styles.text, {color: status === 'success' ? messagesColorBold.success : status === 'failure' ? messagesColorBold.failure : messagesColorBold.caution}]} numberOfLines={1}>
+            <Text style={[styles.text, {textAlign: 'center', color: status === 'success' ? messagesColorBold.success : status === 'failure' ? messagesColorBold.failure : messagesColorBold.caution}]} numberOfLines={1}>
                 {message}
             </Text>
         </Animated.View>
@@ -139,7 +139,7 @@ export const Message2: React.FC<MessageProps> = ({message, status, isVisible, on
 const styles = StyleSheet.create({
     container: {
         backgroundColor: messagesColor.success,
-        padding: metrics.verticalScale(16),
+        padding: metrics.verticalScale(10),
         borderRadius: 25,
         alignSelf: 'center',
         zIndex: 99,

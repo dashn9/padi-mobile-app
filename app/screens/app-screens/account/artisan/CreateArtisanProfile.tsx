@@ -42,7 +42,6 @@ function CreateArtisanProfileScreen({route, navigation}: CreateArtisanProfileScr
         },
     });
     const services = useFetchServicesQuery().data;
-    console.log(services);
 
     const updateServiceValue = (serviceValue: React.SetStateAction<string>) => {
         setServiceValue(serviceValue);
